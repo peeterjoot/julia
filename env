@@ -1,0 +1,5 @@
+# C:\Users\IBM_ADMIN\AppData\Local\Julia-0.3.4\bin\julia.exe
+# C:\Users\IBM_ADMIN\AppData\Local\Julia-0.4.0-dev\bin\julia.exe
+
+PATH=/cygdrive/c/Users/IBM_ADMIN/AppData/Local/Julia-0.3.4/bin:"$PATH"
+#PATH=/cygdrive/c/Users/IBM_ADMIN/AppData/Local/Julia-0.4.0-dev/bin:"$PATH"
