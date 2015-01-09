@@ -1,0 +1,5 @@
+clear all equivalent:
+http://stackoverflow.com/questions/25028873/how-do-i-reload-a-module-in-an-active-julia-session-after-an-edit
+
+workspace()
+
