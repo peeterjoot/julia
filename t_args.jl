@@ -3,6 +3,7 @@
 # docs coming in julia 0.4:
 # http://stackoverflow.com/questions/19821247/how-to-make-user-defined-function-descriptions-docstrings-available-to-julia
 
+# note that #=...=# can be used for a multiline comment.
 #=
 @doc """
    Sum two elements.
