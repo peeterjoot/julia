@@ -66,6 +66,109 @@ end
 
 export RCL_Line_T,SourceLine_T,VSourceLine_T,DiodeLine_T,PowerLine_T,NetlistLines_T,parser ;
 
+#=
+  NETLIST SYNTAX:
+ 
+  These matrices are generated from a text file (netlist) that describes an
+  electrical circuit made of resistors, independent current sources,
+  independent voltage sources, voltage-controlled voltage sources, capacitors, and inductors.
+ 
+  For the netlist, we use the widely-adopted SPICE syntax, as simplified with the following assumptions:
+ 
+    - .end terminates the netlist.  This is case sensitive (unlike spice)
+    - The first line of netlist is a (title) comment unless it starts with R, I, V, E, C, or L.
+    - The netlist file will always include a 0 (ground) node.  There is no error checking to ensure that
+      at least one element is connected to a ground node.
+    - There are no gaps in the node numbers.
+    - I seem to recall that spice files allowed the constants to be specified with k, m, M modifiers.
+      I haven't tried to support that.
+    - Trailing comments (; and anything after that) as described in:
+      https://www.csupomona.edu/~prnelson/courses/ece220/220-spice-notes.pdf
+      are not supported.
+ 
+  The netlist elements lines are specified as follows:
+ 
+  - The syntax for specifying a resistor is a line of the form:
+ 
+      Rlabel node1 node2 value
+ 
+    where "value" is the resistance value.
+ 
+  - The syntax for specifying a current source is lines of the form:
+ 
+      Ilabel node1 node2 DC value
+      Ilabel node1 node2 AC value freq [phase]
+ 
+    and current flows from node1 to node2.
+    Here value, a floating point number, is the amplitude of the current.
+    A line with 'DC value' is equivalent to that of 'AC value 0'. The parameter
+    freq is the frequency in Hertz of the input signal.
+ 
+  - The syntax for specifying a voltage source connected between the nodes node+ and
+    node- is one of:
+ 
+      Vlabel node+ node- DC value
+      Vlabel node+ node- AC value freq [phase]
+ 
+    where node+ and node- identify, respectively, the node where the positive
+    and "negative" terminal is connected to, and value is the amplitude
+    of the voltage source (a floating point value).
+    A line with 'DC value' is equivalent to that of 'AC value 0'. The parameter
+    freq is the frequency in Hertz of the input signal.
+ 
+  - The syntax for specifying a voltage-controlled voltage source,
+    connected between the nodes node+ and node-, is:
+ 
+      Elabel node+ node- nodectrl+ nodectrl- gain [Vt P]
+ 
+    The controlling voltage is between the nodes nodectrl+ and nodectrl-,
+    and the last argument is the source gain (a floating point number).
+ 
+    This models:
+ 
+      V_{node+} - V_{node-} = gain (( V_{nodectrl+} - V_{nodectrl-} )/Vt )^P.
+ 
+    Defaults: Vt = 1, P = 1.  When P is not equal to 1, non-linear power-law elements are returned.
+ 
+  - The syntax for specifying a capacitor is:
+ 
+      Clabel node1 node2 val
+ 
+    where label is an arbitrary label, node1 and node2 are integer circuit node numbers, and val is
+    the capacitance (a floating point number).
+ 
+  - The syntax for specifying an inductor is:
+ 
+      Llabel node1 node2 val
+ 
+    where label is an arbitrary label, node1 and node2 are integer circuit node numbers, and val
+    is the inductance (a floating point number).
+ 
+  - The syntax for specifying a diode modelled by I_d = I_0 ( e^{V/V_t} - 1 ) is:
+ 
+      Dlabel node1 node2 I_0 V_T
+ 
+    where V = V_node1 - V_node2, and the current flows from n1 to n2.
+ 
+  - The syntax for specifying a power-law non-linear term modelled by I = I_0 (V/V_t)^alpha is:
+ 
+      Plabel node1 node2 I_0 V_T alpha
+ 
+    where V is defined as for a diode line above.
+ 
+  - Comment lines, starting with *, as described in the following, are allowed:
+      http://jjc.hydrus.net/jjc/technical/ee/documents/spicehowto.pdf
+ 
+  INPUTS:
+ 
+  - filename [string]:
+ 
+      netlist source file to read.
+
+  OUTPUTS:
+
+  - NetlistLines_T object with the line info for everything that was read.
+=# 
 function parser( filename )
 
    fh = open( filename ) ;
@@ -138,7 +241,9 @@ function parser( filename )
    # two space separated sequences:
    re_two = r"^(\S+)\s+(\S+)\s*$" ;
 
-   re_blankOrComment = r"(^\s*$)|(^\*)" ;
+   re_blank = r"^\s*$" ;
+
+   re_stripTrailingComments = r"^(.*?)\s*;.*$" ;
 
    for line in eachline( fh )
       line = chomp( line ) ;
@@ -149,6 +254,16 @@ function parser( filename )
 
       if ( line[1] == ".end" )
          break ;
+      end
+
+      m = match( re_stripTrailingComments, line )
+      if ( m != nothing )
+         line = m.captures[1] ;
+      end
+
+      m = match( re_blank, line )
+      if ( m != nothing )
+         continue ;
       end
 
       m = match( re_RCL, line ) ;
