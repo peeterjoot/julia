@@ -1,4 +1,7 @@
 module Netlist
+
+   using pd ;
+
    type RCL_Line_T
       typePrefix::Char
       lableText
@@ -62,6 +65,7 @@ module Netlist
       power
 
       allNodes
+      numberOfNonlinearGains
    end
 
    export RCL_Line_T,SourceLine_T,VSourceLine_T,DiodeLine_T,PowerLine_T,NetlistLines_T,parser ;
@@ -73,21 +77,8 @@ module Netlist
      electrical circuit made of resistors, independent current sources,
      independent voltage sources, voltage-controlled voltage sources, capacitors, and inductors.
     
-     For the netlist, the widely-adopted SPICE syntax, as simplified and altered as described below, is used:
-    
-       - .end terminates the netlist.  This is case sensitive (unlike spice)
-       - The first line of netlist is a (title) comment unless it starts with
-         one of the supported element prefixes ( R, L, C, I, V, E, D, P )
-       - The netlist file will always include a 0 (ground) node.  There is no error checking to ensure that
-         at least one element is connected to a ground node.
-       - There are no gaps in the node numbers.
-       - I seem to recall that spice files allowed the constants to be specified with k, m, M modifiers.
-         I haven't tried to support that.
-       - Trailing comments (; and anything after that) as described in:
-         https://www.csupomona.edu/~prnelson/courses/ece220/220-spice-notes.pdf
-         are also now supported.
-    
-     The netlist elements lines are specified as follows:
+     For the netlist, a syntax similar to that of the widely-adopted SPICE program is described below, supporting
+     elements with the following specifications:
     
      - The syntax for specifying a resistor is a line of the form:
     
@@ -157,8 +148,23 @@ module Netlist
     
        where V is defined as for a diode line above.
     
-     - Comment lines, starting with *, as described in the following, are allowed:
+
+     Implemented: 
+       - Comment lines, starting with *, as described in the following, are allowed:
          http://jjc.hydrus.net/jjc/technical/ee/documents/spicehowto.pdf
+       - .end terminates the netlist (case insensitive)
+       - Trailing comments (; and anything after that) as described in:
+         https://www.csupomona.edu/~prnelson/courses/ece220/220-spice-notes.pdf
+         are also now supported.
+       - blank lines are ignored (spice may not do that).
+
+     Not implemented: 
+       - The first line of netlist is a (title) comment unless it starts with
+         one of the supported element prefixes ( R, L, C, I, V, E, D, P )
+       - Spice files allowed the constants to be specified with k, m, M modifiers.
+         I haven't tried to support that.
+       - Checking to verify that there are no gaps in the node numbers.
+       - Checking to verify that the netlist file will always include a 0 (ground) node.
     
      INPUTS:
     
@@ -172,15 +178,17 @@ module Netlist
    =# 
    function parser( filename )
 
+      traceit( "filename: $filename" ) ;
+
       fh = open( filename ) ;
 
       firstLineRead = false ;
       allNodes = Int[] ;
 
-      lineInfo = NetlistLines_T( RCL_Line_T[], RCL_Line_T[], RCL_Line_T[],
+      linesInfo = NetlistLines_T( RCL_Line_T[], RCL_Line_T[], RCL_Line_T[],
                                  SourceLine_T[], SourceLine_T[],
                                  VSourceLine_T[], DiodeLine_T[], PowerLine_T[],
-                                 Int[] ) ;
+                                 Int[], 0 ) ;
 
       # Rlabel node1 node2 value
       # Clabel node1 node2 val
@@ -249,11 +257,14 @@ module Netlist
       re_stripTrailingComments = r"^(.*?)\s*;.*$" ;
 
       lineNumber = 0 ;
+      numberOfNonlinearGains = 0 ;
 
       for line in eachline( fh )
          lineNumber = lineNumber + 1 ;
 
          line = chomp( line ) ;
+
+         #traceit( "$filename:$lineNumber: raw line: $line" ) ;
 
          if ( line[1] == '*' )
             continue ;
@@ -274,6 +285,8 @@ module Netlist
             continue ;
          end
 
+         traceit( "$filename:$lineNumber: filtered line: $line" ) ;
+
          m = match( re_RCL, line ) ;
          if ( m != nothing )
             firstLineRead = true ;
@@ -288,11 +301,11 @@ module Netlist
             i = RCL_Line_T( char(typePrefix[1]), c[2], nodes..., float(c[5]) ) ;
 
             if ( i.typePrefix == 'R' )
-               push!(lineInfo.resistor, i ) ;
+               push!(linesInfo.resistor, i ) ;
             elseif ( i.typePrefix == 'C' )
-               push!(lineInfo.capacitor, i ) ;
+               push!(linesInfo.capacitor, i ) ;
             else
-               push!(lineInfo.inductor, i ) ;
+               push!(linesInfo.inductor, i ) ;
             end
 
             continue ;
@@ -312,9 +325,9 @@ module Netlist
             i = SourceLine_T( char(typePrefix[1]), c[2], nodes..., false, float(c[5]), 0.0, 0.0 ) ;
 
             if ( i.typePrefix == 'V' )
-               push!(lineInfo.voltage, i ) ;
+               push!(linesInfo.voltage, i ) ;
             else
-               push!(lineInfo.current, i ) ;
+               push!(linesInfo.current, i ) ;
             end
 
             continue ;
@@ -341,9 +354,9 @@ module Netlist
             i = SourceLine_T( char(typePrefix[1]), c[2], nodes..., true, float(c[5]), float(c[6]), phase ) ;
 
             if ( i.typePrefix == 'V' )
-               push!(lineInfo.voltage, i ) ;
+               push!(linesInfo.voltage, i ) ;
             else
-               push!(lineInfo.current, i ) ;
+               push!(linesInfo.current, i ) ;
             end
 
             continue ;
@@ -362,7 +375,7 @@ module Netlist
 
             i = DiodeLine_T( char(typePrefix[1]), c[2], nodes..., float(c[5]), float(c[6]) ) ;
 
-            push!(lineInfo.diode, i ) ;
+            push!(linesInfo.diode, i ) ;
 
             continue ;
          end
@@ -380,7 +393,7 @@ module Netlist
 
             i = PowerLine_T( char(typePrefix[1]), c[2], nodes..., float(c[5]), float(c[6]), float(c[7]) ) ;
 
-            push!(lineInfo.power, i ) ;
+            push!(linesInfo.power, i ) ;
 
             continue ;
          end
@@ -402,6 +415,8 @@ module Netlist
 
                vt = float( m.captures[1] ) ; 
                exponent = float( m.captures[2] ) ; 
+
+               numberOfNonlinearGains = numberOfNonlinearGains + 1 ;
             end
 
             nodes = int(c[3:6]) ;
@@ -411,7 +426,7 @@ module Netlist
 
             i = VSourceLine_T( char(typePrefix[1]), c[2], nodes..., float(c[7]), vt, exponent ) ;
 
-            push!(lineInfo.amplifier, i ) ;
+            push!(linesInfo.amplifier, i ) ;
 
             continue ;
          end
@@ -419,10 +434,12 @@ module Netlist
          throw( "$filename:$lineNumber: error parsing line '$line'" ) ;
       end
 
-      lineInfo.allNodes = unique( allNodes ) ;
+      linesInfo.allNodes = unique( allNodes ) ;
+      linesInfo.numberOfNonlinearGains = numberOfNonlinearGains ;
 
       close( fh ) ;
 
-      lineInfo
+      # return:
+      linesInfo
    end
 end
