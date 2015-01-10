@@ -65,6 +65,7 @@ module Netlist
       power
 
       allNodes
+      allFrequencies
       numberOfNonlinearGains
    end
 
@@ -155,16 +156,16 @@ module Netlist
        - .end terminates the netlist (case insensitive)
        - Trailing comments (; and anything after that) as described in:
          https://www.csupomona.edu/~prnelson/courses/ece220/220-spice-notes.pdf
-         are also now supported.
+         are allowed.
        - blank lines are ignored (spice may not do that).
 
      Not implemented: 
        - The first line of netlist is a (title) comment unless it starts with
          one of the supported element prefixes ( R, L, C, I, V, E, D, P )
        - Spice files allowed the constants to be specified with k, m, M modifiers.
-         I haven't tried to support that.
        - Checking to verify that there are no gaps in the node numbers.
        - Checking to verify that the netlist file will always include a 0 (ground) node.
+       - Checking to verify that a lable isn't reused.
     
      INPUTS:
     
@@ -184,11 +185,12 @@ module Netlist
 
       firstLineRead = false ;
       allNodes = Int[] ;
+      allFrequencies = Float64[] ;
 
       linesInfo = NetlistLines_T( RCL_Line_T[], RCL_Line_T[], RCL_Line_T[],
                                  SourceLine_T[], SourceLine_T[],
                                  VSourceLine_T[], DiodeLine_T[], PowerLine_T[],
-                                 Int[], 0 ) ;
+                                 Int[], Float64[], 0 ) ;
 
       # Rlabel node1 node2 value
       # Clabel node1 node2 val
@@ -294,18 +296,18 @@ module Netlist
             c = m.captures ;
 
             nodes = int(c[3:4]) ;
-            push!(allNodes, nodes...) ;
+            push!( allNodes, nodes... ) ;
 
             typePrefix = c[1] ;
 
             i = RCL_Line_T( char(typePrefix[1]), c[2], nodes..., float(c[5]) ) ;
 
             if ( i.typePrefix == 'R' )
-               push!(linesInfo.resistor, i ) ;
+               push!( linesInfo.resistor, i ) ;
             elseif ( i.typePrefix == 'C' )
-               push!(linesInfo.capacitor, i ) ;
+               push!( linesInfo.capacitor, i ) ;
             else
-               push!(linesInfo.inductor, i ) ;
+               push!( linesInfo.inductor, i ) ;
             end
 
             continue ;
@@ -318,17 +320,19 @@ module Netlist
             c = m.captures ;
 
             nodes = int(c[3:4]) ;
-            push!(allNodes, nodes...) ;
+            push!( allNodes, nodes... ) ;
 
             typePrefix = c[1] ;
 
             i = SourceLine_T( char(typePrefix[1]), c[2], nodes..., false, float(c[5]), 0.0, 0.0 ) ;
 
             if ( i.typePrefix == 'V' )
-               push!(linesInfo.voltage, i ) ;
+               push!( linesInfo.voltage, i ) ;
             else
-               push!(linesInfo.current, i ) ;
+               push!( linesInfo.current, i ) ;
             end
+
+            push!( allFrequencies, 0.0 ) ;
 
             continue ;
          end
@@ -347,17 +351,22 @@ module Netlist
             end
 
             nodes = int(c[3:4]) ;
-            push!(allNodes, nodes...) ;
+            push!( allNodes, nodes... ) ;
 
             typePrefix = c[1] ;
+
+            value = float(c[5]) ;
+            freq = float(c[6]) ;
 
             i = SourceLine_T( char(typePrefix[1]), c[2], nodes..., true, float(c[5]), float(c[6]), phase ) ;
 
             if ( i.typePrefix == 'V' )
-               push!(linesInfo.voltage, i ) ;
+               push!( linesInfo.voltage, i ) ;
             else
-               push!(linesInfo.current, i ) ;
+               push!( linesInfo.current, i ) ;
             end
+
+            push!( allFrequencies, freq ) ;
 
             continue ;
          end
@@ -369,13 +378,13 @@ module Netlist
             c = m.captures ;
 
             nodes = int(c[3:4]) ;
-            push!(allNodes, nodes...) ;
+            push!( allNodes, nodes... ) ;
 
             typePrefix = c[1] ;
 
             i = DiodeLine_T( char(typePrefix[1]), c[2], nodes..., float(c[5]), float(c[6]) ) ;
 
-            push!(linesInfo.diode, i ) ;
+            push!( linesInfo.diode, i ) ;
 
             continue ;
          end
@@ -387,13 +396,13 @@ module Netlist
             c = m.captures ;
 
             nodes = int(c[3:4]) ;
-            push!(allNodes, nodes...) ;
+            push!( allNodes, nodes... ) ;
 
             typePrefix = c[1] ;
 
             i = PowerLine_T( char(typePrefix[1]), c[2], nodes..., float(c[5]), float(c[6]), float(c[7]) ) ;
 
-            push!(linesInfo.power, i ) ;
+            push!( linesInfo.power, i ) ;
 
             continue ;
          end
@@ -420,13 +429,13 @@ module Netlist
             end
 
             nodes = int(c[3:6]) ;
-            push!(allNodes, nodes...) ;
+            push!( allNodes, nodes... ) ;
 
             typePrefix = c[1] ;
 
             i = VSourceLine_T( char(typePrefix[1]), c[2], nodes..., float(c[7]), vt, exponent ) ;
 
-            push!(linesInfo.amplifier, i ) ;
+            push!( linesInfo.amplifier, i ) ;
 
             continue ;
          end
@@ -434,7 +443,11 @@ module Netlist
          throw( "$filename:$lineNumber: error parsing line '$line'" ) ;
       end
 
-      linesInfo.allNodes = unique( allNodes ) ;
+      # FIXME: implement: (or enforce spice requirement for this field)
+      # titleline (using firstLineRead)
+
+      linesInfo.allNodes = sort( unique( allNodes ) ) ;
+      linesInfo.allFrequencies = sort( unique( allFrequencies ) ) ;
       linesInfo.numberOfNonlinearGains = numberOfNonlinearGains ;
 
       close( fh ) ;
