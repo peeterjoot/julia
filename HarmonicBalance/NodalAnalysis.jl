@@ -2,6 +2,7 @@ workspace()
 
 using pd ;
 using Netlist ;
+using SparseUtil ;
 
 #=
    Take a sorted array like (0,1,2) or (1,3,4), and add all the negative frequencies.
@@ -120,7 +121,7 @@ function NodalAnalysis( filename )
 
    numFrequencies = length( angularVelocities ) ;
 
-   B = spzeros( biggestNodeNumber + numAdditionalSources, numFrequencies ) ;
+   B = spzerosT( biggestNodeNumber + numAdditionalSources, numFrequencies, 0.0 + im ) ;
 
    xnames = cell( biggestNodeNumber + numAdditionalSources ) ;
    for k in 1:biggestNodeNumber
@@ -206,9 +207,7 @@ function NodalAnalysis( filename )
       end
 
 # NEXT:
-# - how to do complex numbers?
 # - equivalent of find()
-# - equivalent of complex exp()
 #=
       # V,omega,phi => V cos( omega t - phi ) = e^{ j omega t - j phi } * V/2 + e^{-j omega t + j phi } * V/2
 
