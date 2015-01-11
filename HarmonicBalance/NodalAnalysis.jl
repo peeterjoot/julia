@@ -206,14 +206,11 @@ function NodalAnalysis( filename )
          G[ minusNode, r ] = 1 ;
       end
 
-# NEXT:
-# - equivalent of find()
-#=
       # V,omega,phi => V cos( omega t - phi ) = e^{ j omega t - j phi } * V/2 + e^{-j omega t + j phi } * V/2
 
-      omegaIndex = find( angularVelocities == omega ) ;
+      omegaIndex = findin( angularVelocities, omega ) ;
 
-      if ( size(omegaIndex) ~= size(1) )
+      if ( length(omegaIndex) != 0 )
          throw( "failed to find angular velocity $omega in angularVelocities: $angularVelocities" ) ;
       end
 
@@ -222,14 +219,13 @@ function NodalAnalysis( filename )
       else
          B[ r, omegaIndex ] = B[ r, omegaIndex ] + magnitude * exp( - im * phi )/2 ;
 
-         omegaIndex = find( angularVelocities == -omega ) ;
-         if ( size(omegaIndex) ~= size(1) )
+         omegaIndex = findin( angularVelocities, -omega ) ;
+         if ( length(omegaIndex) == 0 )
             throw( "failed to find angular velocity -$omega in angularVelocities: $angularVelocities" ) ;
          end
 
          B[ r, omegaIndex ] = B[ r, omegaIndex ] + magnitude * exp( im * phi )/2 ;
       end
-=#
    end
 
    (G, C, B, angularVelocities)
@@ -323,9 +319,9 @@ end
 
       # V,omega,phi => V cos( omega t - phi ) = e^{ j omega t - j phi } * V/2 + e^{-j omega t + j phi } * V/2
 
-      omegaIndex = find( angularVelocities == omega ) ;
-      if ( size(omegaIndex) ~= size(1) )
-         error( 'NodalAnalysis:find', 'failed to find angular velocity %e in angularVelocities: %s', omega, mat2str(angularVelocities) ) ;
+      omegaIndex = findin( angularVelocities, omega ) ;
+      if ( length(omegaIndex) == 0 )
+         throw( "NodalAnalysis:failed to find angular velocity $omega in $angularVelocities" ) ;
       end
 
       if ( omega == 0 )
@@ -343,10 +339,10 @@ end
             B[ minusNode, omegaIndex ] = B[ minusNode, omegaIndex ] + magnitude * exp( - im * phi )/2 ;
          end
 
-         omegaIndex = find( angularVelocities == -omega ) ;
+         omegaIndex = findin( angularVelocities, -omega ) ;
 
-         if ( size(omegaIndex) ~= size(1) )
-            error( 'NodalAnalysis:find', 'failed to find angular velocity %e in angularVelocities: %s', -omega, mat2str(angularVelocities) ) ;
+         if ( length(omegaIndex) == 0 )
+            throw( "NodalAnalysis:failed to find angular velocity -$omega in $angularVelocities" ) ;
          end
 
          if ( plusNode != 0 )
@@ -368,9 +364,9 @@ end
 
       traceit( sprintf( '%s %d,%d -> %d\n', label, plusNode, minusNode, -io ) ) ;
 
-      omegaIndex = find( angularVelocities == 0 ) ;
-      if ( size(omegaIndex) ~= size(1) )
-         error( 'NodalAnalysis:find', 'failed to find DC frequency entry in angularVelocities: %s', -omega, mat2str(angularVelocities) ) ;
+      omegaIndex = findin( angularVelocities, 0 ) ;
+      if ( length(omegaIndex) == 0 )
+         throw( "NodalAnalysis:failed to find DC frequency entry in $angularVelocities" ) ;
       end
 
       nonlinear{ nlIndex } = struct( 'io', -io, 'type', 'exp', 'vt', vt, 'vp', plusNode, 'vn', minusNode ) ;
