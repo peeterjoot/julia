@@ -4,6 +4,28 @@ using pd ;
 using Netlist ;
 
 #=
+   Take a sorted array like (0,1,2) or (1,3,4), and add all the negative frequencies.
+=#
+function negativeAndPositiveFrequencies( freq )
+   fr = abs( freq ) ;
+
+   firstNonZeroIndex = int( fr[1] < 1 ) + 1 ;
+   frPlus = fr[ firstNonZeroIndex:end ] ;
+
+# From http://stackoverflow.com/a/27884583/189270
+#
+# Two other more elegant ways, but much slower since the array is already sorted.
+# Timed these out of curiousity in time_elementwise.jl
+#
+#   frPlus = filter( x -> x > 0, fr ) ;
+#   frPlus = fr[ fr. > 0 ] ;
+
+   push!( fr, -frPlus... ) ;
+
+   sort( fr ) ; # return
+end
+
+#=
   NodalAnalysis generates the modified nodal analysis (MNA) equations from a text file
  
   This is based on NodalAnalysis.m from ps3a (which included RLC support), and has been generalized to add support
@@ -79,18 +101,16 @@ using Netlist ;
 =#
 function NodalAnalysis( filename )
 
-   i = parser( filename ) ;
+   li = parser( filename ) ;
 
-   biggestNodeNumber = max( i.allNodes... ) ;
-   allfrequencies = negativeAndPositiveFrequencies( i.allFrequencies ) ;
+   biggestNodeNumber = max( li.allNodes... ) ;
+   angularVelocities = negativeAndPositiveFrequencies( li.allFrequencies ) ;
 
-   angularVelocities = 2 * pi * allfrequencies ;
+   traceit( "maxnode: $biggestNodeNumber, freq: $angularVelocities" ) ;
 
-   traceit( "maxnode: $biggestNodeNumber, freq: $allfrequencies" ) ;
-
-   numVoltageSources = length( i.voltage ) ;
-   numAmpSources = length( i.amplifier ) ;
-   numIndSources = length( i.inductor ) ;
+   numVoltageSources = length( li.voltage ) ;
+   numAmpSources = length( li.amplifier ) ;
+   numIndSources = length( li.inductor ) ;
 
    numAdditionalSources = numVoltageSources + numAmpSources + numIndSources ;
 
@@ -98,7 +118,7 @@ function NodalAnalysis( filename )
    G = spzeros( biggestNodeNumber + numAdditionalSources, biggestNodeNumber + numAdditionalSources ) ;
    C = spzeros( biggestNodeNumber + numAdditionalSources, biggestNodeNumber + numAdditionalSources ) ;
 
-   numFrequencies = length( allfrequencies ) ;
+   numFrequencies = length( angularVelocities ) ;
 
    B = spzeros( biggestNodeNumber + numAdditionalSources, numFrequencies ) ;
 
@@ -106,107 +126,118 @@ function NodalAnalysis( filename )
    for k in 1:biggestNodeNumber
       xnames[k] = "V_$k" ;
    end
-
-println( "$xnames" ) ;
-
-# THE REST IS ALL ACTUALLY MATLAB CODE, TO BE REWRITTEN IN JULIA.  NEXT, FIGURE OUT SYNTAX FOR cell (Any ?) array.
-#=
+#traceit( "$xnames" ) ;
 
    # process the resistor lines:
    # note: matlab for loop appears to iterate over matrix by assigning each column to a temp variable
-   labelNumber = 0 ;
-   for res = resistorLines
-      labelNumber = labelNumber + 1 ;
-      label     = resistorLables{labelNumber} ;
-      plusNode  = res(1) ;
-      minusNode = res(2) ;
-      z         = 1/res(3) ;
+   for res in li.resistor
+      plusNode  = res.node1 ;
+      minusNode = res.node2 ;
+      r         = res.value ;
+      z         = 1/r ;
 
-      traceit( '%s %d,%d -> %d\n', label, plusNode, minusNode, 1/z ) ) ;
+      #traceit( "$r" ) ;
 
       # insert the stamp:
-      if ( plusNode )
-         G( plusNode, plusNode ) = G( plusNode, plusNode ) + z ;
-         if ( minusNode )
-            G( plusNode, minusNode ) = G( plusNode, minusNode ) - z ;
-            G( minusNode, plusNode ) = G( minusNode, plusNode ) - z ;
+      if ( plusNode != 0 )
+         G[ plusNode, plusNode ] = G[ plusNode, plusNode ] + z ;
+         if ( minusNode != 0 )
+            G[ plusNode, minusNode ] = G[ plusNode, minusNode ] - z ;
+            G[ minusNode, plusNode ] = G[ minusNode, plusNode ] - z ;
          end
       end
-      if ( minusNode )
-         G( minusNode, minusNode ) = G( minusNode, minusNode ) + z ;
+      if ( minusNode != 0 )
+         G[ minusNode, minusNode ] = G[ minusNode, minusNode ] + z ;
       end
    end
 
    # process the capacitor lines:
-   labelNumber = 0 ;
-   for cap = capLines
-      labelNumber = labelNumber + 1 ;
-      label     = capLables{labelNumber} ;
-      plusNode  = cap(1) ;
-      minusNode = cap(2) ;
-      cv        = cap(3) ;
+   for cap in li.capacitor
+      plusNode  = cap.node1 ;
+      minusNode = cap.node2 ;
+      cv        = cap.value ;
 
-      traceit( sprintf( '%s %d,%d -> %d\n', label, plusNode, minusNode, cv ) ) ;
+      #traceit( "$r" ) ;
 
       # insert the stamp:
-      if ( plusNode )
-         C( plusNode, plusNode ) = C( plusNode, plusNode ) + cv ;
-         if ( minusNode )
-            C( plusNode, minusNode ) = C( plusNode, minusNode ) - cv ;
-            C( minusNode, plusNode ) = C( minusNode, plusNode ) - cv ;
+      if ( plusNode != 0 )
+         C[ plusNode, plusNode ] = C[ plusNode, plusNode ] + cv ;
+         if ( minusNode != 0 )
+            C[ plusNode, minusNode ] = C[ plusNode, minusNode ] - cv ;
+            C[ minusNode, plusNode ] = C[ minusNode, plusNode ] - cv ;
          end
       end
-      if ( minusNode )
-         C( minusNode, minusNode ) = C( minusNode, minusNode ) + cv ;
+      if ( minusNode != 0 )
+         C[ minusNode, minusNode ] = C[ minusNode, minusNode ] + cv ;
       end
    end
 
+#   type SourceLine_T
+#      typePrefix::Char
+#      lableText
+#      node1::Int
+#      node2::Int
+#      isDC::Bool
+#      value::Float64
+#      freq::Float64
+#      phase::Float64
+#   end
+
    # process the voltage sources:
    r = biggestNodeNumber ;
-   labelNumber = 0 ;
-   for vol = voltageLines
+   for vol in li.voltage
       r = r + 1 ;
-      labelNumber     = labelNumber + 1 ;
-      label           = voltageLables{labelNumber} ;
-      plusNode        = vol(1) ;
-      minusNode       = vol(2) ;
-      magnitude       = vol(3) ;
-      omega           = vol(4) ;
-      phi             = vol(5) ;
+      lt              = vol.lableText ;
+      plusNode        = vol.node1 ;
+      minusNode       = vol.node2 ;
+      magnitude       = vol.value ;
+      omega           = vol.omega ;
+      phi             = vol.phase ;
 
-      traceit( sprintf( '%s %d,%d -> %d (%e, %e)\n', label, plusNode, minusNode, magnitude, omega, phi ) ) ;
-      xnames{r} = sprintf( 'i_{%s_{%d,%d}}', label, minusNode, plusNode ) ;
+      xnames[r] = "i_{V$(lt)_{$minusNode,$plusNode}}" ;
 
-      if ( plusNode )
-         G( r, plusNode ) = 1 ;
-         G( plusNode, r ) = -1 ;
+      if ( plusNode != 0 )
+         G[ r, plusNode ] = 1 ;
+         G[ plusNode, r ] = -1 ;
       end
-      if ( minusNode )
-         G( r, minusNode ) = -1 ;
-         G( minusNode, r ) = 1 ;
+      if ( minusNode != 0 )
+         G[ r, minusNode ] = -1 ;
+         G[ minusNode, r ] = 1 ;
       end
 
+# NEXT:
+# - how to do complex numbers?
+# - equivalent of find()
+# - equivalent of complex exp()
+#=
       # V,omega,phi => V cos( omega t - phi ) = e^{ j omega t - j phi } * V/2 + e^{-j omega t + j phi } * V/2
 
       omegaIndex = find( angularVelocities == omega ) ;
 
       if ( size(omegaIndex) ~= size(1) )
-         error( 'NodalAnalysis:find', 'failed to find angular velocity %e in angularVelocities: %s', omega, mat2str(angularVelocities) ) ;
+         throw( "failed to find angular velocity $omega in angularVelocities: $angularVelocities" ) ;
       end
 
       if ( omega == 0 )
-         B( r, omegaIndex ) = B( r, omegaIndex ) + magnitude ;
+         B[ r, omegaIndex ] = B[ r, omegaIndex ] + magnitude ;
       else
-         B( r, omegaIndex ) = B( r, omegaIndex ) + magnitude * exp( - 1j * phi )/2 ;
+         B[ r, omegaIndex ] = B[ r, omegaIndex ] + magnitude * exp( - 1j * phi )/2 ;
 
          omegaIndex = find( angularVelocities == -omega ) ;
          if ( size(omegaIndex) ~= size(1) )
-            error( 'NodalAnalysis:find', 'failed to find angular velocity %e in angularVelocities: %s', -omega, mat2str(angularVelocities) ) ;
+            throw( "failed to find angular velocity -$omega in angularVelocities: $angularVelocities" ) ;
          end
 
-         B( r, omegaIndex ) = B( r, omegaIndex ) + magnitude * exp( 1j * phi )/2 ;
+         B[ r, omegaIndex ] = B[ r, omegaIndex ] + magnitude * exp( 1j * phi )/2 ;
       end
+=#
    end
+
+   (G, C, B, angularVelocities)
+end
+
+# THE REST IS HYBRID MATLAB/JULIA CODE, to be fully REWRITTEN IN JULIA.
+#=
 
    nlIndex = 0 ;
    numberOfDiodes = size( diodeLines, 2 ) ;
@@ -217,12 +248,9 @@ println( "$xnames" ) ;
 
    # value for r (fall through from loop above)
    # process the voltage controlled lines
-   labelNumber = 0 ;
-   for amp = ampLines
+   for amp in ampLines
       r = r + 1 ;
-      labelNumber = labelNumber + 1 ;
 
-      label                = ampLables{labelNumber} ;
       plusNodeNum          = amp(1) ;
       minusNodeNum         = amp(2) ;
       plusControlNodeNum   = amp(3) ;
@@ -233,28 +261,28 @@ println( "$xnames" ) ;
 
       traceit( sprintf( '%s %d,%d (%d,%d) -> %d\n', label, plusNodeNum, minusNodeNum, plusControlNodeNum, minusControlNodeNum, gain ) ) ;
 
-      if ( minusNodeNum )
-         G( r, minusNodeNum ) = 1 ;
-         G( minusNodeNum, r ) = -1 ;
+      if ( minusNodeNum != 0 )
+         G[ r, minusNodeNum ] = 1 ;
+         G[ minusNodeNum, r ] = -1 ;
       end
-      if ( plusNodeNum )
-         G( r, plusNodeNum ) = -1 ;
-         G( plusNodeNum, r ) = 1 ;
+      if ( plusNodeNum != 0 )
+         G[ r, plusNodeNum ] = -1 ;
+         G[ plusNodeNum, r ] = 1 ;
       end
 
       if ( 1 == alpha )
-         if ( plusControlNodeNum )
-            G( r, plusControlNodeNum ) = gain/vt ;
+         if ( plusControlNodeNum != 0 )
+            G[ r, plusControlNodeNum ] = gain/vt ;
          end
-         if ( minusControlNodeNum )
-            G( r, minusControlNodeNum ) = -gain/vt ;
+         if ( minusControlNodeNum != 0 )
+            G[ r, minusControlNodeNum ] = -gain/vt ;
          end
       else
          nlIndex = nlIndex + 1 ;
 
          nonlinear{ nlIndex } = struct( 'io', gain, 'type', 'power', 'vt', vt, 'vp', plusControlNodeNum, 'vn', minusControlNodeNum, 'exponent', alpha ) ;
 
-         D( r, nlIndex ) = -1 ;
+         D[ r, nlIndex ] = -1 ;
       end
 
       xnames{r} = sprintf( 'i_{%s_{%d,%d}}', label, plusNodeNum, minusNodeNum ) ;
@@ -262,36 +290,30 @@ println( "$xnames" ) ;
 
    # value for r (fall through from loop above)
    # process the inductors:
-   labelNumber = 0 ;
-   for ind = indLines
+   for ind in indLines
       r = r + 1 ;
-      labelNumber = labelNumber + 1 ;
-      label       = indLables{labelNumber} ;
       plusNode    = ind(1) ;
       minusNode   = ind(2) ;
       value       = ind(3) ;
 
       traceit( sprintf( '%s %d,%d -> %d\n', label, plusNode, minusNode, value ) ) ;
 
-      if ( plusNode )
-         G( r, plusNode ) = -1 ;
-         G( plusNode, r ) = 1 ;
+      if ( plusNode != 0 )
+         G[ r, plusNode ] = -1 ;
+         G[ plusNode, r ] = 1 ;
       end
-      if ( minusNode )
-         G( r, minusNode ) = 1 ;
-         G( minusNode, r ) = -1 ;
+      if ( minusNode != 0 )
+         G[ r, minusNode ] = 1 ;
+         G[ minusNode, r ] = -1 ;
       end
 
-      C( r, r ) = value ;
+      C[ r, r ) = value ;
 
       xnames{r} = sprintf( 'i_{%s_{%d,%d}}', label, plusNode, minusNode ) ;
    end
 
    # process the current sources:
-   labelNumber = 0 ;
-   for cur = currentLines
-      labelNumber     = labelNumber + 1 ;
-      label           = currentLables{labelNumber} ;
+   for cur in currentLines
       plusNode        = cur(1) ;
       minusNode       = cur(2) ;
       magnitude       = cur(3) ;
@@ -308,18 +330,18 @@ println( "$xnames" ) ;
       end
 
       if ( omega == 0 )
-         if ( plusNode )
-            B( plusNode, omegaIndex ) = B( plusNode, omegaIndex ) - magnitude ;
+         if ( plusNode != 0 )
+            B[ plusNode, omegaIndex ] = B[ plusNode, omegaIndex ] - magnitude ;
          end
-         if ( minusNode )
-            B( minusNode, omegaIndex ) = B( minusNode, omegaIndex ) + magnitude ;
+         if ( minusNode != 0 )
+            B[ minusNode, omegaIndex ] = B[ minusNode, omegaIndex ] + magnitude ;
          end
       else
-         if ( plusNode )
-            B( plusNode, omegaIndex ) = B( plusNode, omegaIndex ) - magnitude * exp( - 1j * phi )/2 ;
+         if ( plusNode != 0 )
+            B[ plusNode, omegaIndex ] = B[ plusNode, omegaIndex ] - magnitude * exp( - 1j * phi )/2 ;
          end
-         if ( minusNode )
-            B( minusNode, omegaIndex ) = B( minusNode, omegaIndex ) + magnitude * exp( - 1j * phi )/2 ;
+         if ( minusNode != 0 )
+            B[ minusNode, omegaIndex ] = B[ minusNode, omegaIndex ] + magnitude * exp( - 1j * phi )/2 ;
          end
 
          omegaIndex = find( angularVelocities == -omega ) ;
@@ -328,20 +350,17 @@ println( "$xnames" ) ;
             error( 'NodalAnalysis:find', 'failed to find angular velocity %e in angularVelocities: %s', -omega, mat2str(angularVelocities) ) ;
          end
 
-         if ( plusNode )
-            B( plusNode, omegaIndex ) = B( plusNode, omegaIndex ) - magnitude * exp( 1j * phi )/2 ;
+         if ( plusNode != 0 )
+            B[ plusNode, omegaIndex ] = B[ plusNode, omegaIndex ] - magnitude * exp( 1j * phi )/2 ;
          end
-         if ( minusNode )
-            B( minusNode, omegaIndex ) = B( minusNode, omegaIndex ) + magnitude * exp( 1j * phi )/2 ;
+         if ( minusNode != 0 )
+            B[ minusNode, omegaIndex ] = B[ minusNode, omegaIndex ] + magnitude * exp( 1j * phi )/2 ;
          end
       end
    end
 
    # process the diode sources:
-   labelNumber = 0 ;
-   for dio = diodeLines
-      labelNumber = labelNumber + 1 ;
-      label       = diodeLables{labelNumber} ;
+   for dio in diodeLines
       plusNode    = dio(1) ;
       minusNode   = dio(2) ;
       io          = dio(3) ;
@@ -356,22 +375,19 @@ println( "$xnames" ) ;
       end
 
       nonlinear{ nlIndex } = struct( 'io', -io, 'type', 'exp', 'vt', vt, 'vp', plusNode, 'vn', minusNode ) ;
-      if ( plusNode )
-         B( plusNode, omegaIndex ) = B( plusNode, omegaIndex ) + io ;
-         D( plusNode, nlIndex ) = 1 ;
+      if ( plusNode != 0 )
+         B[ plusNode, omegaIndex ] = B[ plusNode, omegaIndex ] + io ;
+         D[ plusNode, nlIndex ] = 1 ;
       end
-      if ( minusNode )
-         B( minusNode, omegaIndex ) = B( minusNode, omegaIndex ) - io ;
-         D( minusNode, nlIndex ) = -1 ;
+      if ( minusNode != 0 )
+         B[ minusNode, omegaIndex ] = B[ minusNode, omegaIndex ] - io ;
+         D[ minusNode, nlIndex ] = -1 ;
       end
    end
 
    # process the power law elements:
-   labelNumber = 0 ;
 
-   for pow = powerLines
-      labelNumber = labelNumber + 1 ;
-      label       = powerLables{labelNumber} ;
+   for pow in powerLines
       plusNode    = pow(1) ;
       minusNode   = pow(2) ;
       io          = pow(3) ;
@@ -382,33 +398,13 @@ println( "$xnames" ) ;
       traceit( sprintf( '%s %d,%d -> %e, %e, %e\n', label, plusNode, minusNode, io, vt, alpha ) ) ;
 
       nonlinear{ nlIndex } = struct( 'io', -io, 'type', 'power', 'vt', vt, 'vp', plusNode, 'vn', minusNode, 'exponent', alpha ) ;
-      if ( plusNode )
-         D( plusNode, nlIndex ) = 1 ;
+      if ( plusNode != 0 )
+         D[ plusNode, nlIndex ] = 1 ;
       end
-      if ( minusNode )
-         D( minusNode, nlIndex ) = -1 ;
+      if ( minusNode != 0 )
+         D[ minusNode, nlIndex ] = -1 ;
       end
    end
 
    results = struct( 'G', G, 'C', C, 'B', B, 'angularVelocities', angularVelocities, 'D', D, 'xnames', {xnames}, 'nonlinear', {nonlinear} ) ;
 =#
-end
-
-#=
-   Take a sorted array like (0,1,2) or (1,3,4), and add all the negative frequencies.
-=#
-function negativeAndPositiveFrequencies( freq )
-   fr = abs( freq ) ;
-
-   firstNonZeroIndex = int( fr[1] < 1 ) + 1 ;
-   frPlus = fr[ firstNonZeroIndex:end ] ;
-
-# two other more elegant ways, but much slower since the array is already sorted.
-# better ways: http://stackoverflow.com/a/27884583/189270
-#   frPlus = filter( x -> x > 0, fr ) ;
-#   frPlus = fr[ fr. > 0 ] ;
-# both of these are _much_ slower (see time_elementwise.jl)
-
-   push!( fr, -frPlus... ) ;
-   allfrequencies = sort( fr ) ;
-end

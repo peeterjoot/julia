@@ -17,7 +17,7 @@ module Netlist
       node2::Int
       isDC::Bool
       value::Float64
-      freq::Float64
+      omega::Float64
       phase::Float64
    end
 
@@ -356,9 +356,9 @@ module Netlist
             typePrefix = c[1] ;
 
             value = float(c[5]) ;
-            freq = float(c[6]) ;
+            omega = 2 * pi * float(c[6]) ;
 
-            i = SourceLine_T( char(typePrefix[1]), c[2], nodes..., true, float(c[5]), float(c[6]), phase ) ;
+            i = SourceLine_T( char(typePrefix[1]), c[2], nodes..., true, float(c[5]), omega, phase ) ;
 
             if ( i.typePrefix == 'V' )
                push!( linesInfo.voltage, i ) ;
@@ -366,7 +366,7 @@ module Netlist
                push!( linesInfo.current, i ) ;
             end
 
-            push!( allFrequencies, freq ) ;
+            push!( allFrequencies, omega ) ;
 
             continue ;
          end
