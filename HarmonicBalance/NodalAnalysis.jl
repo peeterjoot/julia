@@ -1,5 +1,8 @@
 workspace()
 
+using pd ;
+using Netlist ;
+
 #=
   NodalAnalysis generates the modified nodal analysis (MNA) equations from a text file
  
@@ -76,103 +79,41 @@ workspace()
 =#
 function NodalAnalysis( filename )
 
-   using pd ;
+   i = parser( filename ) ;
 
-# THIS IS ALL ACTUALLY MATLAB CODE, TO BE REWRITTEN IN JULIA.
+   biggestNodeNumber = max( i.allNodes... ) ;
+   allfrequencies = negativeAndPositiveFrequencies( i.allFrequencies ) ;
 
-   % if we wanted to allow for gaps in the node numbers (like 1, 3, 4, 5), then we'd have to count the number of unique node numbers
-   % instead of just taking a max, and map the matrix positions to the original node numbers later.
-   %
-   allnodes = zeros(2, 1) ; % assume a zero node.
-   allfrequencies = zeros(1, 0) ; % don't assume a DC source
+   angularVelocities = 2 * pi * allfrequencies ;
 
-%enableTrace() ;
-   sz = size( resistorLines, 2 ) ;
-   if ( sz )
-      traceit( sprintf( 'resistorLines: %d', sz ) ) ;
+   traceit( "maxnode: $biggestNodeNumber, freq: $allfrequencies" ) ;
 
-      allnodes = horzcat( allnodes, resistorLines(1:2, :) ) ;
-   end
-   sz = size( currentLines, 2 ) ;
-   if ( sz )
-      traceit( sprintf( 'currentLines: %d', sz ) ) ;
-
-      allnodes = horzcat( allnodes, currentLines(1:2, :) ) ;
-      allfrequencies = horzcat( allfrequencies, currentLines(4, :) ) ;
-   end
-   sz = size( diodeLines, 2 ) ;
-   if ( sz )
-      traceit( sprintf( 'diodeLines: %d', sz ) ) ;
-
-      allnodes = horzcat( allnodes, diodeLines(1:2, :) ) ;
-      allfrequencies = horzcat( allfrequencies, 0 ) ;
-   end
-   sz = size( powerLines, 2 ) ;
-   if ( sz )
-      traceit( sprintf( 'powerLines: %d', sz ) ) ;
-
-      allnodes = horzcat( allnodes, powerLines(1:2, :) ) ;
-      allfrequencies = horzcat( allfrequencies, 0 ) ;
-   end
-   sz = size( voltageLines, 2 ) ;
-   if ( sz )
-      traceit( sprintf( 'voltageLines: %d', sz ) ) ;
-
-      allnodes = horzcat( allnodes, voltageLines(1:2, :) ) ;
-      allfrequencies = horzcat( allfrequencies, voltageLines(4, :) ) ;
-   end
-   sz = size( ampLines, 2 ) ;
-   if ( sz )
-      traceit( sprintf( 'ampLines: %d', sz ) ) ;
-
-      allnodes = horzcat( allnodes, ampLines(1:2, :), ampLines(3:4, :) ) ;
-   end
-   sz = size( capLines, 2 ) ;
-   if ( sz )
-      traceit( sprintf( 'capLines: %d', sz ) ) ;
-
-      allnodes = horzcat( allnodes, capLines(1:2, :) ) ;
-   end
-   sz = size( indLines, 2 ) ;
-   if ( sz )
-      traceit( sprintf( 'indLines: %d', sz ) ) ;
-
-      allnodes = horzcat( allnodes, indLines(1:2, :) ) ;
-   end
-%disableTrace() ;
-
-   allfrequencies = unique( horzcat( abs(allfrequencies), -abs(allfrequencies) ) ) ;
-   angularVelocities = allfrequencies.' ; % convert to Mx1
-
-   biggestNodeNumber = max( max( allnodes ) ) ;
-   traceit( [ 'maxnode: ', sprintf('%d', biggestNodeNumber) ] ) ;
-
-   %
-   % Done parsing the netlist file.
-   %
-   %----------------------------------------------------------------------------
-
-   numVoltageSources = size( voltageLines, 2 ) ;
-   numAmpSources = size( ampLines, 2 ) ;
-   numIndSources = size( indLines, 2 ) ;
+   numVoltageSources = length( i.voltage ) ;
+   numAmpSources = length( i.amplifier ) ;
+   numIndSources = length( i.inductor ) ;
 
    numAdditionalSources = numVoltageSources + numAmpSources + numIndSources ;
 
-   % have to adjust these sizes for sources, and voltage control sources
-   G = zeros( biggestNodeNumber + numAdditionalSources, biggestNodeNumber + numAdditionalSources, 'like', sparse(1) ) ;
-   C = zeros( biggestNodeNumber + numAdditionalSources, biggestNodeNumber + numAdditionalSources, 'like', G ) ;
+   # have to adjust these sizes for sources, and voltage control sources
+   G = spzeros( biggestNodeNumber + numAdditionalSources, biggestNodeNumber + numAdditionalSources ) ;
+   C = spzeros( biggestNodeNumber + numAdditionalSources, biggestNodeNumber + numAdditionalSources ) ;
 
-   numFrequencies = size( allfrequencies, 2 ) ;
+   numFrequencies = length( allfrequencies ) ;
 
-   B = zeros( biggestNodeNumber + numAdditionalSources, numFrequencies, 'like', G ) ;
+   B = spzeros( biggestNodeNumber + numAdditionalSources, numFrequencies ) ;
 
-   xnames = cell( biggestNodeNumber + numAdditionalSources, 1 ) ;
-   for k = 1:biggestNodeNumber
-      xnames{k} = sprintf( 'V_%d', k ) ;
+   xnames = cell( biggestNodeNumber + numAdditionalSources ) ;
+   for k in 1:biggestNodeNumber
+      xnames[k] = "V_$k" ;
    end
 
-   % process the resistor lines:
-   % note: matlab for loop appears to iterate over matrix by assigning each column to a temp variable
+println( "$xnames" ) ;
+
+# THE REST IS ALL ACTUALLY MATLAB CODE, TO BE REWRITTEN IN JULIA.  NEXT, FIGURE OUT SYNTAX FOR cell (Any ?) array.
+#=
+
+   # process the resistor lines:
+   # note: matlab for loop appears to iterate over matrix by assigning each column to a temp variable
    labelNumber = 0 ;
    for res = resistorLines
       labelNumber = labelNumber + 1 ;
@@ -181,9 +122,9 @@ function NodalAnalysis( filename )
       minusNode = res(2) ;
       z         = 1/res(3) ;
 
-      traceit( sprintf( '%s %d,%d -> %d\n', label, plusNode, minusNode, 1/z ) ) ;
+      traceit( '%s %d,%d -> %d\n', label, plusNode, minusNode, 1/z ) ) ;
 
-      % insert the stamp:
+      # insert the stamp:
       if ( plusNode )
          G( plusNode, plusNode ) = G( plusNode, plusNode ) + z ;
          if ( minusNode )
@@ -196,7 +137,7 @@ function NodalAnalysis( filename )
       end
    end
 
-   % process the capacitor lines:
+   # process the capacitor lines:
    labelNumber = 0 ;
    for cap = capLines
       labelNumber = labelNumber + 1 ;
@@ -207,7 +148,7 @@ function NodalAnalysis( filename )
 
       traceit( sprintf( '%s %d,%d -> %d\n', label, plusNode, minusNode, cv ) ) ;
 
-      % insert the stamp:
+      # insert the stamp:
       if ( plusNode )
          C( plusNode, plusNode ) = C( plusNode, plusNode ) + cv ;
          if ( minusNode )
@@ -220,7 +161,7 @@ function NodalAnalysis( filename )
       end
    end
 
-   % process the voltage sources:
+   # process the voltage sources:
    r = biggestNodeNumber ;
    labelNumber = 0 ;
    for vol = voltageLines
@@ -245,7 +186,7 @@ function NodalAnalysis( filename )
          G( minusNode, r ) = 1 ;
       end
 
-      % V,omega,phi => V cos( omega t - phi ) = e^{ j omega t - j phi } * V/2 + e^{-j omega t + j phi } * V/2
+      # V,omega,phi => V cos( omega t - phi ) = e^{ j omega t - j phi } * V/2 + e^{-j omega t + j phi } * V/2
 
       omegaIndex = find( angularVelocities == omega ) ;
 
@@ -274,8 +215,8 @@ function NodalAnalysis( filename )
    D = zeros( size(B, 1), 1, 'like', G ) ;
    nonlinear = cell( numberOfDiodes + numberOfPowers + numberOfNonlinearGains, 1 ) ;
 
-   % value for r (fall through from loop above)
-   % process the voltage controlled lines
+   # value for r (fall through from loop above)
+   # process the voltage controlled lines
    labelNumber = 0 ;
    for amp = ampLines
       r = r + 1 ;
@@ -319,8 +260,8 @@ function NodalAnalysis( filename )
       xnames{r} = sprintf( 'i_{%s_{%d,%d}}', label, plusNodeNum, minusNodeNum ) ;
    end
 
-   % value for r (fall through from loop above)
-   % process the inductors:
+   # value for r (fall through from loop above)
+   # process the inductors:
    labelNumber = 0 ;
    for ind = indLines
       r = r + 1 ;
@@ -346,7 +287,7 @@ function NodalAnalysis( filename )
       xnames{r} = sprintf( 'i_{%s_{%d,%d}}', label, plusNode, minusNode ) ;
    end
 
-   % process the current sources:
+   # process the current sources:
    labelNumber = 0 ;
    for cur = currentLines
       labelNumber     = labelNumber + 1 ;
@@ -359,7 +300,7 @@ function NodalAnalysis( filename )
 
       traceit( sprintf( '%s %d,%d -> %d (%e, %e)\n', label, plusNode, minusNode, magnitude, omega, phi ) ) ;
 
-      % V,omega,phi => V cos( omega t - phi ) = e^{ j omega t - j phi } * V/2 + e^{-j omega t + j phi } * V/2
+      # V,omega,phi => V cos( omega t - phi ) = e^{ j omega t - j phi } * V/2 + e^{-j omega t + j phi } * V/2
 
       omegaIndex = find( angularVelocities == omega ) ;
       if ( size(omegaIndex) ~= size(1) )
@@ -396,7 +337,7 @@ function NodalAnalysis( filename )
       end
    end
 
-   % process the diode sources:
+   # process the diode sources:
    labelNumber = 0 ;
    for dio = diodeLines
       labelNumber = labelNumber + 1 ;
@@ -425,7 +366,7 @@ function NodalAnalysis( filename )
       end
    end
 
-   % process the power law elements:
+   # process the power law elements:
    labelNumber = 0 ;
 
    for pow = powerLines
@@ -451,4 +392,23 @@ function NodalAnalysis( filename )
 
    results = struct( 'G', G, 'C', C, 'B', B, 'angularVelocities', angularVelocities, 'D', D, 'xnames', {xnames}, 'nonlinear', {nonlinear} ) ;
 =#
+end
+
+#=
+   Take a sorted array like (0,1,2) or (1,3,4), and add all the negative frequencies.
+=#
+function negativeAndPositiveFrequencies( freq )
+   fr = abs( freq ) ;
+
+   firstNonZeroIndex = int( fr[1] < 1 ) + 1 ;
+   frPlus = fr[ firstNonZeroIndex:end ] ;
+
+# two other more elegant ways, but much slower since the array is already sorted.
+# better ways: http://stackoverflow.com/a/27884583/189270
+#   frPlus = filter( x -> x > 0, fr ) ;
+#   frPlus = fr[ fr. > 0 ] ;
+# both of these are _much_ slower (see time_elementwise.jl)
+
+   push!( fr, -frPlus... ) ;
+   allfrequencies = sort( fr ) ;
 end
