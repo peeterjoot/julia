@@ -221,14 +221,14 @@ function NodalAnalysis( filename )
       if ( omega == 0 )
          B[ r, omegaIndex ] = B[ r, omegaIndex ] + magnitude ;
       else
-         B[ r, omegaIndex ] = B[ r, omegaIndex ] + magnitude * exp( - 1j * phi )/2 ;
+         B[ r, omegaIndex ] = B[ r, omegaIndex ] + magnitude * exp( - im * phi )/2 ;
 
          omegaIndex = find( angularVelocities == -omega ) ;
          if ( size(omegaIndex) ~= size(1) )
             throw( "failed to find angular velocity -$omega in angularVelocities: $angularVelocities" ) ;
          end
 
-         B[ r, omegaIndex ] = B[ r, omegaIndex ] + magnitude * exp( 1j * phi )/2 ;
+         B[ r, omegaIndex ] = B[ r, omegaIndex ] + magnitude * exp( im * phi )/2 ;
       end
 =#
    end
@@ -338,10 +338,10 @@ end
          end
       else
          if ( plusNode != 0 )
-            B[ plusNode, omegaIndex ] = B[ plusNode, omegaIndex ] - magnitude * exp( - 1j * phi )/2 ;
+            B[ plusNode, omegaIndex ] = B[ plusNode, omegaIndex ] - magnitude * exp( - im * phi )/2 ;
          end
          if ( minusNode != 0 )
-            B[ minusNode, omegaIndex ] = B[ minusNode, omegaIndex ] + magnitude * exp( - 1j * phi )/2 ;
+            B[ minusNode, omegaIndex ] = B[ minusNode, omegaIndex ] + magnitude * exp( - im * phi )/2 ;
          end
 
          omegaIndex = find( angularVelocities == -omega ) ;
@@ -351,10 +351,10 @@ end
          end
 
          if ( plusNode != 0 )
-            B[ plusNode, omegaIndex ] = B[ plusNode, omegaIndex ] - magnitude * exp( 1j * phi )/2 ;
+            B[ plusNode, omegaIndex ] = B[ plusNode, omegaIndex ] - magnitude * exp( im * phi )/2 ;
          end
          if ( minusNode != 0 )
-            B[ minusNode, omegaIndex ] = B[ minusNode, omegaIndex ] + magnitude * exp( 1j * phi )/2 ;
+            B[ minusNode, omegaIndex ] = B[ minusNode, omegaIndex ] + magnitude * exp( im * phi )/2 ;
          end
       end
    end
