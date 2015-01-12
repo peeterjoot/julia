@@ -22,6 +22,10 @@ STARTED:
 
       Should use FFT instead... as is, need equivalent of ndgrid().
 
+   DiodeNonVdependent.jl
+
+      Precalculate matrices that can be used repeatedly in DiodeCurrentAndJacobian.
+
 -------------------------------------------------------------------
 
 ... some new Julia specific FIXMEs to deal with.
@@ -32,10 +36,6 @@ TODO:
    DiodeCurrentAndJacobian.m
 
       Do the V dependent parts of the I(V) and J(V) current and Jacobian calculations.
-
-   DiodeNonVdependent.m
-
-      Precalculate matrices that can be used repeatedly in DiodeCurrentAndJacobian.
 
 -------------------------------------------------------------------
 Plotting and test related:
