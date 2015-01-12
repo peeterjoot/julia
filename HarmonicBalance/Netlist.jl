@@ -1,6 +1,9 @@
 module Netlist
 
+   # export RCL_Line_T, SourceLine_T, VSourceLine_T, DiodeLine_T, PowerLine_T, NetlistLines_T, parser ;
+   export NodalAnalysis ;
    using pd ;
+   using SparseUtil ;
 
    type RCL_Line_T
       typePrefix::Char
@@ -68,8 +71,6 @@ module Netlist
       allFrequencies
       numberOfNonlinearGains
    end
-
-   export RCL_Line_T,SourceLine_T,VSourceLine_T,DiodeLine_T,PowerLine_T,NetlistLines_T,parser ;
 
    #=
      NETLIST SYNTAX:
@@ -417,7 +418,7 @@ module Netlist
 
             if ( optNonlinear == "" )
                vt = 0.0 ;
-               exponent = 0.0 ;
+               exponent = 1.0 ;
             else
                # depend on throw here for error checking (like the type conversions do)
                m = match( re_two, optNonlinear ) ;
@@ -455,4 +456,6 @@ module Netlist
       # return:
       linesInfo
    end
+
+   include( "NodalAnalysis.jl" ) ;
 end

@@ -13,12 +13,16 @@ R1 3 2 0.5
 C1 5 2 1
 L1 9 2 3
 Rg 11 0 0.001
+* nonlinear:
 Dx 1 2 1.01 2.02
+* nonlinear:
 Py 1 2 1.01 2.02 3.14
 E1 1 2 3 4 7
 E2 1  2 3 4 7 
 *E2 1   ; invalid
+* nonlinear:
 E3 1 2 3   4 7 1.03 2.718   
+* nonlinear:
 E4 4 12 3   4 7 1.03 2.718111
 *
 .END

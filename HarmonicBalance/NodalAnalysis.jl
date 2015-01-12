@@ -1,8 +1,17 @@
-workspace()
+#workspace()
+#
+#using pd ;
+#using Netlist ;
+#using SparseUtil ;
 
-using pd ;
-using Netlist ;
-using SparseUtil ;
+type NonlinearElement_T
+   typeDesc
+   vp::Int
+   vn::Int
+   vt::Float64
+   magnitude::Float64
+   exponent::Float64
+end
 
 #=
    Take a sorted array like (0,1,2) or (1,3,4), and add all the negative frequencies.
@@ -127,7 +136,6 @@ function NodalAnalysis( filename )
    for k in 1:biggestNodeNumber
       xnames[k] = "V_$k" ;
    end
-#traceit( "$xnames" ) ;
 
    # process the resistor lines:
    # note: matlab for loop appears to iterate over matrix by assigning each column to a temp variable
@@ -137,7 +145,7 @@ function NodalAnalysis( filename )
       r         = res.value ;
       z         = 1/r ;
 
-      #traceit( "$r" ) ;
+      #println( "$r" ) ;
 
       # insert the stamp:
       if ( plusNode != 0 )
@@ -158,7 +166,7 @@ function NodalAnalysis( filename )
       minusNode = cap.node2 ;
       cv        = cap.value ;
 
-      #traceit( "$r" ) ;
+      #println( "$r" ) ;
 
       # insert the stamp:
       if ( plusNode != 0 )
@@ -172,17 +180,6 @@ function NodalAnalysis( filename )
          C[ minusNode, minusNode ] = C[ minusNode, minusNode ] + cv ;
       end
    end
-
-#   type SourceLine_T
-#      typePrefix::Char
-#      lableText
-#      node1::Int
-#      node2::Int
-#      isDC::Bool
-#      value::Float64
-#      freq::Float64
-#      phase::Float64
-#   end
 
    # process the voltage sources:
    r = biggestNodeNumber ;
@@ -210,7 +207,7 @@ function NodalAnalysis( filename )
 
       omegaIndex = findin( angularVelocities, omega ) ;
 
-      if ( length(omegaIndex) != 0 )
+      if ( length(omegaIndex) == 0 )
          throw( "failed to find angular velocity $omega in angularVelocities: $angularVelocities" ) ;
       end
 
@@ -228,33 +225,30 @@ function NodalAnalysis( filename )
       end
    end
 
-   (G, C, B, angularVelocities)
-end
-
-# THE REST IS HYBRID MATLAB/JULIA CODE, to be fully REWRITTEN IN JULIA.
-#=
-
    nlIndex = 0 ;
-   numberOfDiodes = size( diodeLines, 2 ) ;
-   numberOfPowers = size( powerLines, 2 ) ;
+   numberOfDiodes = length( li.diode ) ;
+   numberOfPowers = length( li.power ) ;
 
-   D = zeros( size(B, 1), 1, 'like', G ) ;
-   nonlinear = cell( numberOfDiodes + numberOfPowers + numberOfNonlinearGains, 1 ) ;
+   D = spzeros( size(B, 1), numberOfDiodes + numberOfPowers + li.numberOfNonlinearGains ) ;
+
+   # this will end up with as many rows as D has columns:
+   nonlinear = NonlinearElement_T[] ;
 
    # value for r (fall through from loop above)
    # process the voltage controlled lines
-   for amp in ampLines
+   for amp in li.amplifier
       r = r + 1 ;
 
-      plusNodeNum          = amp(1) ;
-      minusNodeNum         = amp(2) ;
-      plusControlNodeNum   = amp(3) ;
-      minusControlNodeNum  = amp(4) ;
-      gain                 = amp(5) ;
-      vt                   = amp(6) ;
-      alpha                = amp(7) ;
+      lt                   = amp.lableText ;
+      plusNodeNum          = amp.node1 ;
+      minusNodeNum         = amp.node2 ;
+      plusControlNodeNum   = amp.nc1 ;
+      minusControlNodeNum  = amp.nc2 ;
+      gain                 = amp.gain ;
+      vt                   = amp.vt ;
+      alpha                = amp.exponent ;
 
-      traceit( sprintf( '%s %d,%d (%d,%d) -> %d\n', label, plusNodeNum, minusNodeNum, plusControlNodeNum, minusControlNodeNum, gain ) ) ;
+      #println( "$amp" ) ;
 
       if ( minusNodeNum != 0 )
          G[ r, minusNodeNum ] = 1 ;
@@ -265,7 +259,7 @@ end
          G[ plusNodeNum, r ] = 1 ;
       end
 
-      if ( 1 == alpha )
+      if ( 1.0 == alpha )
          if ( plusControlNodeNum != 0 )
             G[ r, plusControlNodeNum ] = gain/vt ;
          end
@@ -275,23 +269,27 @@ end
       else
          nlIndex = nlIndex + 1 ;
 
-         nonlinear{ nlIndex } = struct( 'io', gain, 'type', 'power', 'vt', vt, 'vp', plusControlNodeNum, 'vn', minusControlNodeNum, 'exponent', alpha ) ;
+         n = NonlinearElement_T( "power", plusControlNodeNum, minusControlNodeNum, vt, gain, alpha ) ;
+
+         push!( nonlinear, n ) ;
 
          D[ r, nlIndex ] = -1 ;
       end
 
-      xnames{r} = sprintf( 'i_{%s_{%d,%d}}', label, plusNodeNum, minusNodeNum ) ;
+      xnames[r] = "i_{E$(lt)_{$plusNodeNum,$minusNodeNum}}" ;
    end
 
    # value for r (fall through from loop above)
    # process the inductors:
-   for ind in indLines
+   for ind in li.inductor
       r = r + 1 ;
-      plusNode    = ind(1) ;
-      minusNode   = ind(2) ;
-      value       = ind(3) ;
 
-      traceit( sprintf( '%s %d,%d -> %d\n', label, plusNode, minusNode, value ) ) ;
+      lt          = ind.lableText ;
+      plusNode    = ind.node1 ;
+      minusNode   = ind.node2 ;
+      value       = ind.value ;
+
+      #println( "$ind" ) ;
 
       if ( plusNode != 0 )
          G[ r, plusNode ] = -1 ;
@@ -302,20 +300,20 @@ end
          G[ minusNode, r ] = -1 ;
       end
 
-      C[ r, r ) = value ;
+      C[ r, r ] = value ;
 
-      xnames{r} = sprintf( 'i_{%s_{%d,%d}}', label, plusNode, minusNode ) ;
+      xnames[r] = "i_{E$(lt)_{$plusNode,$minusNode}}" ;
    end
 
    # process the current sources:
-   for cur in currentLines
-      plusNode        = cur(1) ;
-      minusNode       = cur(2) ;
-      magnitude       = cur(3) ;
-      omega           = cur(4) ;
-      phi             = cur(5) ;
+   for cur in li.current
+      plusNode        = cur.node1 ;
+      minusNode       = cur.node2 ;
+      magnitude       = cur.value ;
+      omega           = cur.omega ;
+      phi             = cur.phase ;
 
-      traceit( sprintf( '%s %d,%d -> %d (%e, %e)\n', label, plusNode, minusNode, magnitude, omega, phi ) ) ;
+      #println( "$cur" ) ;
 
       # V,omega,phi => V cos( omega t - phi ) = e^{ j omega t - j phi } * V/2 + e^{-j omega t + j phi } * V/2
 
@@ -355,21 +353,23 @@ end
    end
 
    # process the diode sources:
-   for dio in diodeLines
-      plusNode    = dio(1) ;
-      minusNode   = dio(2) ;
-      io          = dio(3) ;
-      vt          = dio(4) ;
+   for dio in li.diode
+      plusNode    = dio.node1 ;
+      minusNode   = dio.node2 ;
+      io          = dio.io ;
+      vt          = dio.vt ;
       nlIndex = nlIndex + 1 ;
 
-      traceit( sprintf( '%s %d,%d -> %d\n', label, plusNode, minusNode, -io ) ) ;
+      #println( "$dio" ) ;
 
       omegaIndex = findin( angularVelocities, 0 ) ;
       if ( length(omegaIndex) == 0 )
          throw( "NodalAnalysis:failed to find DC frequency entry in $angularVelocities" ) ;
       end
 
-      nonlinear{ nlIndex } = struct( 'io', -io, 'type', 'exp', 'vt', vt, 'vp', plusNode, 'vn', minusNode ) ;
+      n = NonlinearElement_T( "exp", plusNode, minusNode, vt, io, 0.0 ) ;
+
+      push!( nonlinear, n ) ;
       if ( plusNode != 0 )
          B[ plusNode, omegaIndex ] = B[ plusNode, omegaIndex ] + io ;
          D[ plusNode, nlIndex ] = 1 ;
@@ -381,18 +381,20 @@ end
    end
 
    # process the power law elements:
-
-   for pow in powerLines
-      plusNode    = pow(1) ;
-      minusNode   = pow(2) ;
-      io          = pow(3) ;
-      vt          = pow(4) ;
-      alpha       = pow(5) ;
+   for pow in li.power
+      plusNode    = pow.node1 ;
+      minusNode   = pow.node2 ;
+      io          = pow.io ;
+      vt          = pow.vt ;
+      alpha       = pow.exponent ;
       nlIndex = nlIndex + 1 ;
 
-      traceit( sprintf( '%s %d,%d -> %e, %e, %e\n', label, plusNode, minusNode, io, vt, alpha ) ) ;
+      #println( "$pow" ) ;
 
-      nonlinear{ nlIndex } = struct( 'io', -io, 'type', 'power', 'vt', vt, 'vp', plusNode, 'vn', minusNode, 'exponent', alpha ) ;
+      n = NonlinearElement_T( "power", plusNode, minusNode, vt, io, alpha ) ;
+
+      push!( nonlinear, n ) ;
+
       if ( plusNode != 0 )
          D[ plusNode, nlIndex ] = 1 ;
       end
@@ -401,5 +403,5 @@ end
       end
    end
 
-   results = struct( 'G', G, 'C', C, 'B', B, 'angularVelocities', angularVelocities, 'D', D, 'xnames', {xnames}, 'nonlinear', {nonlinear} ) ;
-=#
+   (G, C, B, angularVelocities, D, xnames, nonlinear) ;
+end
