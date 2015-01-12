@@ -1,9 +1,11 @@
-function [II, JI] = DiodeCurrentAndJacobian( in, V )
-   % DiodeCurrentAndJacobian: Calculate the non-linear current contributions of the diode
-   % and its associated Jacobian.
+#=
+   DiodeCurrentAndJacobian: Calculate the non-linear current contributions of the diode
+   and its associated Jacobian.
+=#
+function DiodeCurrentAndJacobian( in, V )
 
    S = length( in.nonlinearMatrices ) ;
-   %traceit( sprintf( 'entry.  S = %d', S ) ) ;
+   #traceit( "entry.  S = $S" ) ;
 
    vSize = size( in.Y, 1 ) ;
    twoNplusOne = size( in.F, 1 ) ;
@@ -14,9 +16,8 @@ function [II, JI] = DiodeCurrentAndJacobian( in, V )
    for i = 1:S
       H = in.nonlinearMatrices{ i }.H ;
 
-      expType = ( strcmp( in.nonlinear{ i }.type, 'exp' ) ) ;
-      if ( ~expType )
-         exponentValue = in.nonlinear{ i }.exponent ;
+      if ( in.nonlinear[ i ].type == "exp" )
+         exponentValue = in.nonlinear[ i ].exponent ;
       end
 
       ee = zeros( twoNplusOne, 1 ) ;
@@ -24,7 +25,7 @@ function [II, JI] = DiodeCurrentAndJacobian( in, V )
       he = zeros( twoNplusOne, vSize ) ;
 
       for j = 1:twoNplusOne
-         ht = H( j, : ) ;
+         ht = H[ j, : ] ;
 
          x = ht * V ;
 
@@ -36,13 +37,15 @@ function [II, JI] = DiodeCurrentAndJacobian( in, V )
             gPrime = exponentValue * ( x )^( exponentValue - 1 ) ;
          end
 
-         ee( j ) = g ;
-         he( j, : ) = ht * gPrime ;
+         ee[ j ] = g ;
+         he[ j, : ] = ht * gPrime ;
       end
 
-      II = II + in.nonlinearMatrices{ i }.A * ee ;
-      JI = JI + in.nonlinearMatrices{ i }.A * he ;
+      II = II + in.nonlinearMatrices[ i ].A * ee ;
+      JI = JI + in.nonlinearMatrices[ i ].A * he ;
    end
 
-   %traceit( 'exit' ) ;
+   #traceit( 'exit' ) ;
+
+   (II, JI) ;
 end
