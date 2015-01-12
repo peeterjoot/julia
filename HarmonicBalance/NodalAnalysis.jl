@@ -132,6 +132,7 @@ function NodalAnalysis( filename )
 
    B = spzerosT( biggestNodeNumber + numAdditionalSources, numFrequencies, 0.0 + im ) ;
 
+# FIXME: this could be array of string in Julia
    xnames = cell( biggestNodeNumber + numAdditionalSources ) ;
    for k in 1:biggestNodeNumber
       xnames[k] = "V_$k" ;
