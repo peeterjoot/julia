@@ -10,6 +10,9 @@ type HBSolveParams
    maxStepMultiples::Int
 end
 
+# Dict of Symbol/Union(Float64, Int, Bool) :
+# http://julia.readthedocs.org/en/latest/manual/types/?highlight=union%20type
+# (or Dict of Any?)
    defp = HBSolveParams( 
          1e-6,    # tolF
          1e-3,    # edV
