@@ -30,6 +30,11 @@ STARTED:
 
       Do the V dependent parts of the I(V) and J(V) current and Jacobian calculations.
 
+   HBSolve.jl
+      Harmonic Balance workhorse. 
+
+   ... have to deal with function parameters.  These were essentially passed by hash in the matlab code.  Is the Julia equivalent a hash?
+
 -------------------------------------------------------------------
 
 ... some new Julia specific FIXMEs to deal with.
