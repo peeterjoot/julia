@@ -3,28 +3,28 @@
    and its associated Jacobian.
 
 inputs:
-   in.nonlinearMatrices
-   in.Y
-   in.F
-   in.nonlinear
+   in[ :nonlinearMatrices ]
+   in[ :Y ]
+   in[ :F ]
+   in[ :nonlinear ]
 =#
 function DiodeCurrentAndJacobian( in, V )
 
-   S = length( in.nonlinearMatrices ) ;
+   S = length( in[ :nonlinearMatrices ] ) ;
    #traceit( "entry.  S = $S" ) ;
 
-   vSize = size( in.Y, 1 ) ;
-   twoNplusOne = size( in.F, 1 ) ;
+   vSize = size( in[ :Y ], 1 ) ;
+   twoNplusOne = size( in[ :F ], 1 ) ;
 
    II = zeros( vSize, 1 ) ;
    JI = zeros( vSize, vSize ) ;
 
    for i = 1:S
-      H = in.nonlinearMatrices[ i ].H ;
+      H = in[ :nonlinearMatrices ][ i ].H ;
 
-      powerType = ( in.nonlinear[ i ].type == :POWER )
+      powerType = ( in[ :nonlinear ][ i ].type == :POWER ) ;
       if ( powerType )
-         exponentValue = in.nonlinear[ i ].exponent ;
+         exponentValue = in[ :nonlinear ][ i ].exponent ;
       end
 
       ee = zeros( twoNplusOne, 1 ) ;
@@ -50,11 +50,11 @@ function DiodeCurrentAndJacobian( in, V )
          he[ j, : ] = ht * gPrime ;
       end
 
-      II = II + in.nonlinearMatrices[ i ].A * ee ;
-      JI = JI + in.nonlinearMatrices[ i ].A * he ;
+      II = II + in[ :nonlinearMatrices ][ i ].A * ee ;
+      JI = JI + in[ :nonlinearMatrices ][ i ].A * he ;
    end
 
    #traceit( 'exit' ) ;
 
-   (II, JI) ;
+   [ II, JI ] ;
 end

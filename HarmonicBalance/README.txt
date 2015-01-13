@@ -1,4 +1,3 @@
-PORTED: 
 -------------------------------------------------------------------
 Infrastructure:
 
@@ -7,20 +6,28 @@ Infrastructure:
       Parse the netlist file and return the time domain MNA equation matrices and an
       encoding of any non-linear elements.
 
+   FIXME: 1) cell => string array conversion.
+
    FourierMatrixComplex.jl
 
       Compute the "Small F" Fourier matrix for the discrete Fourier transform.
 
       (FIXME: Should use FFT instead)
 
--------------------------------------------------------------------
-
-STARTED:
--------------------------------------------------------------------
-
    HarmonicBalance.jl
       Construct the Frequency domain equivalents of the linear portions of the network.
       Consumes results from NodalAnalysis().
+
+      FIXME: 1) deal with find() call.
+
+   HBSolve.jl
+      Harmonic Balance workhorse. 
+
+      FIXME: 1) array references to translate.
+      FIXME: 1) min (omega) stuff.
+
+-------------------------------------------------------------------
+Solver:
 
    DiodeNonVdependent.jl
 
@@ -30,29 +37,16 @@ STARTED:
 
       Do the V dependent parts of the I(V) and J(V) current and Jacobian calculations.
 
-   HBSolve.jl
-      Harmonic Balance workhorse. 
-
-      FIXME: 1) array references to translate.
-
--------------------------------------------------------------------
-
-... some new Julia specific FIXMEs to deal with.
-
-TODO: 
--------------------------------------------------------------------
-
 -------------------------------------------------------------------
 Plotting and test related:
 
-   TestSolver.m
-      Generates the cputime/error plots
-
-   PlotWaveforms.m
+   PlotWaveforms.jl
       Calls HBSolve() for a netlist file and caches the result.
       Then plots the results using a set of plot specifications.
 
-STARTED:
+   TestSolver.jl
+      Generates the cputime/error plots
+
    makefigures.jl
       Driver for all the plots.  Calls PlotWaveforms()
 

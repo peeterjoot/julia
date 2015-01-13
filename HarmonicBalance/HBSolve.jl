@@ -1,11 +1,3 @@
-type HBSolveOutput_T
-   v
-   V
-   ecputime
-   omega
-   R
-end
-
 #=
   Uses the Harmonic Balance Method to solve the
   steady state condtion of the circuit described in p[ :fileName ]
@@ -140,7 +132,7 @@ function HBSolve( N, p )
          plambda = dlambda ;
       end
 
-      if ( 0 == mod(i, p[ :dispfrequency) ] )
+      if ( 0 == ( i % p[ :dispfrequency) ) )
          println( "iteration $i: lambda: $lambda, |V0| = ", norm( V0 ), ", cond = $jcond" ) ;
       end
 
@@ -223,8 +215,14 @@ function HBSolve( N, p )
       v[ i : R : end ] = r.F * V[ i : R : end ] ;
    end
 
-   h = HBSolveOutput_T( v, V, ecputime, omega, R ) ;
-
    # return this function's data along with the return data from HarmonicBalance().
-   (h, r)
+   h = r ;
+
+   h[ :v ]        = v ;
+   h[ :V ]        = V ;
+   h[ :ecputime ] = ecputime ;
+   h[ :omega ]    = omega ;
+   h[ :R ]        = R ;
+
+   h ;
 end

@@ -56,21 +56,21 @@
 
  INPUT PARAMETERS:
 
- - inputs [struct]:
+ - inputs [Dict]:
 
     This function consumes all the output parameters of:
 
        results = NodalAnalyis(...)
 
-    a struct() return with fields including: G, C, B, angularVelocities, D, nonlinear.
+    a Dict() return with fields including: G, C, B, angularVelocities, D, nonlinear.
 
-    That struct output is passed into this function as inputs.
+    That output is passed into this function as inputs.
 
- - N [integer]:
+ - N [Int]:
 
      The number of frequencies to include in the bandwith limited Fourier representation (3)
 
- - omega [double]:
+ - omega [Float64]:
 
      The base frequency for all the higher level harmonics.
 
@@ -80,15 +80,15 @@
 
  With R equal to the total number of MNA variables, the returned parameters
 
- - results.Y [array]
+ - results[ :Y ] [array]
 
     R(2N+1) x R(2N+1) matrix, where the 2N+1 RxR matrices down the diagonal are formed from sums of G's and (j omega n C)'s
 
- - results.I [array]
+ - results[ :I ] [array]
 
     R x (2 N + 1) matrix of linear source Fourier coefficients.
 
- - results.Vnames [cell]
+ - results[ :Vnames ] [cell]
 
    is an R x (2 N + 1) array of strings for each of the Fourier coefficient variables in the frequency domain equations.
 
@@ -105,13 +105,13 @@ using pd ;
 
 function HarmonicBalance( inputs, N, omega )
 
-   #results = inputs ;    # return these for convienence.
+   results = inputs ;    # return these for convienence.
 
-   G                 = inputs.G ;
-   C                 = inputs.C ;
-   B                 = inputs.B ;
-   angularVelocities = inputs.angularVelocities ;
-   xnames            = inputs.xnames ;
+   G                 = inputs[ :G ] ;
+   C                 = inputs[ :C ] ;
+   B                 = inputs[ :B ] ;
+   angularVelocities = inputs[ :angularVelocities ] ;
+   xnames            = inputs[ :xnames ] ;
 
    traceit( "N = $N, omega: $omega" ) ;
 
@@ -119,7 +119,7 @@ function HarmonicBalance( inputs, N, omega )
 
    R = size( G, 1 ) ;
    szG = size( G ) ;
-   if ( R ~= size(G, 2) )
+   if ( R != size(G, 2) )
       throw( "HarmonicBalance:squareCheck: expected G ($szG) to be square" ) ;
    end
 
@@ -160,22 +160,22 @@ function HarmonicBalance( inputs, N, omega )
       q = q + R ;
    end
 
-   results.Y = Y ;
-   results.I = I ;
-   results.Vnames = Vnames ;
+   results[ :Y ] = Y ;
+   results[ :I ] = I ;
+   results[ :Vnames ] = Vnames ;
 
    %-----------------
    % precalculate the Fourier transform matrix pairs and cache them:
    F = FourierMatrixComplex( N ) ;
 
-   Finv = conj( F )/( 2 * N + 1 ) ;
+   Finv = conj( F )/ twoNplusOne ;
 
-   results.F = F ;
-   results.Finv = Finv ;
+   results[ :F ] = F ;
+   results[ :Finv ] = Finv ;
    %-----------------
 
    nm = DiodeNonVdependent( results ) ;
-   results.nonlinearMatrices = nm ;
+   results[ :nonlinearMatrices ] = nm ;
 
    %-----------------
 

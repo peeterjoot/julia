@@ -10,18 +10,17 @@ end
 #=
    DiodeNonVdependent: V independent parts of the diode current and Jacobian calculations.
 
-FIXME: introduce type for input params (or more): p.nonlinear, p.D, p.Y, p.F, p.Finv
 =#
 function DiodeNonVdependent( p )
 
-   nonlinear = p.nonlinear ;
+   nonlinear = p[ :nonlinear ] ;
 
    S = length( nonlinear ) ;
-   dsz = size( p.D, 1 ) ;
+   dsz = size( p[ :D ], 1 ) ;
    #traceit( "entry:  S = $S, dsz = $dsz" ) ;
 
-   vSize = length( p.Y ) ;
-   twoNplusOne = size( p.F, 1 ) ;
+   vSize = length( p[ :Y ] ) ;
+   twoNplusOne = size( p[ :F ], 1 ) ;
    nonlinearMatrices = NonlinearMatrices_T[] ;
 
    for i = 1:S
@@ -32,7 +31,7 @@ function DiodeNonVdependent( p )
       outerD = spzerosT( vSize, twoNplusOne, 0.0 ) ;
 
       vecInnerD = spzerosT( dsz, 1, 0 ) ;
-      vecOuterD = p.D[ :, i ] ;
+      vecOuterD = p[ :D ][ :, i ] ;
 
       # for Ennnn non-linear terms the selector of the vp/vn components differs from the scale of the non-linear contribution:
       if ( dio.vp )
@@ -47,9 +46,9 @@ function DiodeNonVdependent( p )
          outerD[ 1 + (j-1) * dsz : j * dsz, j ] = vecOuterD ;
       end
 
-      A = dio.io * outerD * p.Finv ;
+      A = dio.io * outerD * p[ :Finv ] ;
 
-      H = p.F * innerD.' /dio.vt ;
+      H = p[ :F ] * innerD.' /dio.vt ;
 
       # don't really have to cache innerD,outerD but keep for debug for now.
       nl = NonlinearMatrices_T( innerD, outerD, H, A ) ;

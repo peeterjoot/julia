@@ -13,16 +13,6 @@ type NonlinearElement_T
    exponent::Float64
 end
 
-type NodalResults_T
-   G
-   C
-   B
-   angularVelocities
-   D
-   xnames
-   nonlinear
-end
-
 #=
    Take a sorted array like (0,1,2) or (1,3,4), and add all the negative frequencies.
 =#
@@ -67,22 +57,22 @@ end
  
   With R equal to the total number of MNA variables, the returned parameters are
  
-  - results.G [array]
+  - results[ :G ] [array]
  
      RxR matrix of resistance stamps.
  
-  - results.C [array]
+  - results[ :C ] [array]
  
      RxR matrix of stamps for the time dependent portion of the MNA equations.
  
-  - results.B [array]
+  - results[ :B ] [array]
  
      RxM matrix of constant source terms.  Each column encodes the current sources
      for increasing frequencies.  For example, if there are DC sources in
      the circuit the first column would have contributions from the DC sources,
      and any columns after that would be for higher frequencies.
  
-  - results.angularVelocities [array]
+  - results[ :angularVelocities ] [array]
  
      Mx1 matrix of angular velocities ( 2 pi freq, where freq is from an AC current
      or voltage line specification ), ordered from lowest to highest, including
@@ -91,19 +81,19 @@ end
  
      A zero value in one of the angularVelocities vector positions represents a DC source.
  
-  - results.xnames [cell]
+  - results[ :xnames ] [cell]
  
     is an Rx1 array of strings for each of the variables in the resulting system.
     Entries will be added to this for each node voltage in the system.
     Current variables will be added for each DC voltage source, each DC voltage
     controlled voltage source, as well as any inductor currents.
  
-  - results.nonlinear [array of struct]
+  - results[ :nonlinear ] [array of NonlinearElement_T]
  
     An Sx1 array that encodes all the non-linear source information, where S is the number
     of non-linear sources.
  
-  - results.D [array]
+  - results[ :D ] [array]
  
     is an RxS matrix.  The i-th column of D contains the magnitudes of the contributions
     of the i-th non-linear source.  For example, if the i'th (diode) source is:
@@ -414,5 +404,13 @@ function NodalAnalysis( filename )
       end
    end
 
-   NodalResults_T( G, C, B, angularVelocities, D, xnames, nonlinear ) ;
+   [
+      :G                 => G,
+      :C                 => C,
+      :B                 => B,
+      :angularVelocities => angularVelocities,
+      :D                 => D,
+      :xnames            => xnames,
+      :nonlinear         => nonlinear
+   ] ;
 end
