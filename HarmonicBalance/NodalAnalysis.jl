@@ -5,12 +5,22 @@
 #using SparseUtil ;
 
 type NonlinearElement_T
-   typeDesc
+   typeDesc::Symbol
    vp::Int
    vn::Int
    vt::Float64
    magnitude::Float64
    exponent::Float64
+end
+
+type NodalResults_T
+   G
+   C
+   B
+   angularVelocities
+   D
+   xnames
+   nonlinear
 end
 
 #=
@@ -270,7 +280,7 @@ function NodalAnalysis( filename )
       else
          nlIndex = nlIndex + 1 ;
 
-         n = NonlinearElement_T( "power", plusControlNodeNum, minusControlNodeNum, vt, gain, alpha ) ;
+         n = NonlinearElement_T( :POWER, plusControlNodeNum, minusControlNodeNum, vt, gain, alpha ) ;
 
          push!( nonlinear, n ) ;
 
@@ -368,7 +378,7 @@ function NodalAnalysis( filename )
          throw( "NodalAnalysis:failed to find DC frequency entry in $angularVelocities" ) ;
       end
 
-      n = NonlinearElement_T( "exp", plusNode, minusNode, vt, io, 0.0 ) ;
+      n = NonlinearElement_T( :EXPONENT, plusNode, minusNode, vt, io, 0.0 ) ;
 
       push!( nonlinear, n ) ;
       if ( plusNode != 0 )
@@ -392,7 +402,7 @@ function NodalAnalysis( filename )
 
       #println( "$pow" ) ;
 
-      n = NonlinearElement_T( "power", plusNode, minusNode, vt, io, alpha ) ;
+      n = NonlinearElement_T( :POWER, plusNode, minusNode, vt, io, alpha ) ;
 
       push!( nonlinear, n ) ;
 
@@ -404,5 +414,5 @@ function NodalAnalysis( filename )
       end
    end
 
-   (G, C, B, angularVelocities, D, xnames, nonlinear) ;
+   NodalResults_T( G, C, B, angularVelocities, D, xnames, nonlinear ) ;
 end

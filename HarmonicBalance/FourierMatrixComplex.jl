@@ -1,3 +1,11 @@
+# https://github.com/JuliaLang/julia/blob/master/examples/ndgrid.jl
+function ndgrid{T}(v1::AbstractVector{T}, v2::AbstractVector{T})
+    m, n = length(v1), length(v2)
+    v1 = reshape(v1, m, 1)
+    v2 = reshape(v2, 1, n)
+    (repmat(v1, 1, n), repmat(v2, m, 1))
+end
+
 #=
    FourierMatrixComplex Function to determine the fourier matrix for the discrete
    fourier transform and its inverse.
@@ -22,15 +30,26 @@
    where \bar{F} is the complex conjugate of F.
 =#
 function FourierMatrixComplex( N )
-   r = -N:N ;
    twoNplusOne = 2 * N + 1 ;
 
-   # http://stackoverflow.com/a/20388887/189270
-   # http://www.mathworks.com/help/matlab/ref/ndgrid.html (Example: Evaluate Function over gridded domain)
-   [X1, X2] = ndgrid( r, r ) ;
+   #http://stackoverflow.com/a/27915802/189270
+   # Transposing the range turns it into a row vector, which is
+   # then scaled by all the elements in the column vector range
+   #
+   # (-2:2)' = -2  -1  0  1  2
+   #
+   # producing the grid products:
+   #
+   #   (-2:2) .* (-2:2)' =
+   # 5x5 Array{Int64,2}:
+   #   4   2  0  -2  -4
+   #   2   1  0  -1  -2
+   #   0   0  0   0   0
+   #  -2  -1  0   1   2
+   #  -4  -2  0   2   4
+   #
+   # (would this also work in Matlab?)
 
-   # visual verification of the method.  This part is just the index pairs multiplied:
-   # X1.*X2
-
-   F = exp( 1j * 2 * pi * X1.*X2 / twoNplusOne ) ;
+   scale = im * 2 * pi / twoNplusOne ;
+   exp( scale * ((-N:N) .* (-N:N)') ) ;
 end

@@ -7,6 +7,12 @@ Infrastructure:
       Parse the netlist file and return the time domain MNA equation matrices and an
       encoding of any non-linear elements.
 
+   FourierMatrixComplex.jl
+
+      Compute the "Small F" Fourier matrix for the discrete Fourier transform.
+
+      (FIXME: Should use FFT instead)
+
 -------------------------------------------------------------------
 
 STARTED:
@@ -15,12 +21,6 @@ STARTED:
    HarmonicBalance.jl
       Construct the Frequency domain equivalents of the linear portions of the network.
       Consumes results from NodalAnalysis().
-
-   FourierMatrixComplex.jl
-
-      Compute the "Small F" Fourier matrix for the discrete Fourier transform.
-
-      Should use FFT instead... as is, need equivalent of ndgrid().
 
    DiodeNonVdependent.jl
 

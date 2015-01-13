@@ -1,6 +1,12 @@
 #=
    DiodeCurrentAndJacobian: Calculate the non-linear current contributions of the diode
    and its associated Jacobian.
+
+inputs:
+   in.nonlinearMatrices
+   in.Y
+   in.F
+   in.nonlinear
 =#
 function DiodeCurrentAndJacobian( in, V )
 
@@ -14,9 +20,10 @@ function DiodeCurrentAndJacobian( in, V )
    JI = zeros( vSize, vSize ) ;
 
    for i = 1:S
-      H = in.nonlinearMatrices{ i }.H ;
+      H = in.nonlinearMatrices[ i ].H ;
 
-      if ( in.nonlinear[ i ].type == "exp" )
+      powerType = ( in.nonlinear[ i ].type == :POWER )
+      if ( powerType )
          exponentValue = in.nonlinear[ i ].exponent ;
       end
 
@@ -29,12 +36,14 @@ function DiodeCurrentAndJacobian( in, V )
 
          x = ht * V ;
 
-         if ( expType )
-            g      = exp( x ) ;
-            gPrime = g ;
-         else
+         # FIXME: a little confusing to have both a power type (with an exponent variable)
+         # and an exponent type representing e^x.
+         if ( powerType )
             g      = ( x )^( exponentValue ) ;
             gPrime = exponentValue * ( x )^( exponentValue - 1 ) ;
+         else
+            g      = exp( x ) ;
+            gPrime = g ;
          end
 
          ee[ j ] = g ;
