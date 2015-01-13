@@ -1,32 +1,34 @@
-type HBSolveParams
-   tolF::Float64
-   edV::Float64
-   JcondTol::Float64
-   iterations::Int
-   subiterations::Int
-   minStep::Float64
-   dlambda::Float64
-   dispfrequency::Bool
-   maxStepMultiples::Int
+type HBSolveOutput_T
+   v
+   V
+   ecputime
+   omega
+   R
 end
 
-# Dict of Symbol/Union(Float64, Int, Bool) :
-# http://julia.readthedocs.org/en/latest/manual/types/?highlight=union%20type
-# (or Dict of Any?)
-   defp = HBSolveParams( 
-         1e-6,    # tolF
-         1e-3,    # edV
-         1e-23,   # JcondTol
-         50,      # iterations
-         50,      # subiterations
-         0.0001,  # minStep
-         0.01,    # dlambda
-         1,       # dispfrequency
-         50       # maxStepMultiples
-         ) ;
+#=
+  Uses the Harmonic Balance Method to solve the
+  steady state condtion of the circuit described in p.fileName.
 
+  Harmonic frequencies are limited to N.
 
-# FIXME: introduce parameter construction method that accounts for all this:
+  It returns the vector containing the unknowns of the circuit, v, ordered as
+  described in HarmonicBalance.jl and the cpu time required to solve the
+  circuit using Newton's Method.
+=#
+function HBSolve( N, p )
+   # Dict of Symbol,Any: (could also use Union(Int,Bool,Float64)), but it may not buy much.
+   defp = [ :tolF =>             1e-6,
+            :edV =>              1e-3,
+            :JcondTol =>         1e-23,
+            :iterations =>       50,
+            :subiterations =>    50,
+            :minStep =>          0.0001,
+            :dlambda =>          0.01,
+            :dispfrequency =>    1,
+            :maxStepMultiples => 50 ] ;
+
+   # FIXME: introduce parameter construction method that accounts for all this:
    # tolerances
    if ( ~isfield( p, 'tolF' ) )
       p.tolF = defp.tolF ;
@@ -64,17 +66,6 @@ end
    end
 
 
-#=
-  Uses the Harmonic Balance Method to solve the
-  steady state condtion of the circuit described in p.fileName.
-
-  Harmonic frequencies are limited to N.
-
-  It returns the vector containing the unknowns of the circuit, v, ordered as
-  described in HarmonicBalance.jl and the cpu time required to solve the
-  circuit using Newton's Method.
-=#
-function h = HBSolve( N, p )
    r = NodalAnalysis( p.fileName ) ;
 
    # Harmonic Balance Parameters
@@ -130,7 +121,7 @@ function h = HBSolve( N, p )
 #            J = r.Y - JI ;
 #            jcond = rcond( J ) ;
 #         end
-          
+
          while ( isnan( jcond ) )
             println( "lambda: $dlambda, cond = $jcond" ) ;
 
@@ -229,16 +220,14 @@ function h = HBSolve( N, p )
       println( "solution did not converge after ", num2str( totalIterations ), " iterations " ) ;
    end
 
-   # return this function's data along with the return data from HarmonicBalance().
-   h = r ;
    # also return a time domain conversion right out of the box:
    v = zeros( size( V ) ) ;
    for i = 1:R
-      v( i : R : end ) = r.F * V( i : R : end ) ;
+      v[ i : R : end ] = r.F * V[ i : R : end ] ;
    end
-   h.v = v ;
-   h.V = V ;
-   h.ecputime = ecputime ;
-   h.omega = omega ;
-   h.R = R ;
+
+   h = HBSolveOutput_T( v, V, ecputime, omega, R ) ;
+
+   # return this function's data along with the return data from HarmonicBalance().
+   (h, r)
 end

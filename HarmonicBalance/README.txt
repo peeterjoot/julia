@@ -49,11 +49,13 @@ Plotting and test related:
       Generates the cputime/error plots
 
    PlotWaveforms.m
-      Calls HBSolve() or NewtonsHarmonicBalance() for a netlist file and caches the result.
-      Then plots the results using a set 
-      of plot specifications.
+      Calls HBSolve() for a netlist file and caches the result.
+      Then plots the results using a set of plot specifications.
 
-   makefigures.m
+STARTED:
+   makefigures.jl
       Driver for all the plots.  Calls PlotWaveforms()
+
+         Has references to saveHelper() to deal with.
 
 -------------------------------------------------------------------
