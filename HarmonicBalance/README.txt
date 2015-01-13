@@ -33,7 +33,7 @@ STARTED:
    HBSolve.jl
       Harmonic Balance workhorse. 
 
-   ... have to deal with function parameters.  These were essentially passed by hash in the matlab code.  Is the Julia equivalent a hash?
+      FIXME: 1) array references to translate.
 
 -------------------------------------------------------------------
 
