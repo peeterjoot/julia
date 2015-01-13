@@ -8,7 +8,7 @@ function makefigures()
 
    [fileExtension, savePlot] = saveHelper() ;
 
-   if ( doAll || 0 )
+   if ( doAll || false )
       p = [ :fileName => "../circuits/BridgeRectifier.netlist"  ] ;
       p[ :figName ] = "bridgeRectifier" ;
 
@@ -24,7 +24,6 @@ function makefigures()
       %p[ :N ] = 3 ;
       p[ :logPlot ] = false ;
       p[ :xLabel ] = "Time (s)" ;
-      %p[ :useBigF ] = false ;
 
       p[ :figNum ] = 2 ;
       p[ :figDesc ] = "SourceAndOutputVoltages" ;
@@ -56,12 +55,11 @@ function makefigures()
       PlotWaveforms( p ) ;
    end
 
-   if ( doAll || 0 )
+   if ( doAll || false )
       p = [ :fileName => "../circuits/BridgeRectifierPow.netlist"  ] ;
       p[ :figName ] = "bridgeRectifierPow" ;
       p[ :xLabel ] = "Time (s)" ;
       %p[ :allowCaching ] = false ;
-      p[ :useBigF ] = false ; % can"t use BigF method for this circuit.
       %p[ :minStep ] = 1e-6 ;
       %p[ :dlambda ] = 0.001 ;
       p[ :iterations ] = 100 ;
@@ -78,7 +76,7 @@ function makefigures()
       PlotWaveforms( p ) ;
    end
 
-   if ( doAll || 0 )
+   if ( doAll || false )
       p = [ :fileName => "../circuits/BridgeRectifierCap.netlist"  ] ;
       p[ :figName ] = "bridgeRectifierCapFilter" ;
       p[ :xLabel ] = "Time (s)" ;
@@ -115,7 +113,7 @@ function makefigures()
       p[ :yLabel ] = "Current (A)" ;
       PlotWaveforms( p ) ;
 
-      if ( 1 )
+      if ( true )
          p[ :figDesc ] = "DiodeVoltages" ;
          p[ :title ] = "Diode Voltages" ;
          p[ :figNum ] = 4 ;
@@ -168,10 +166,9 @@ function makefigures()
       %PlotWaveforms( p ) ;
    end
 
-   if ( doAll || 0 )
+   if ( doAll || false )
       p = [ :fileName => "../circuits/simpleSingleNodeRectifier.netlist"  ] ;
       p[ :figName ] = "simpleRectifierCircuit" ;
-      %p[ :useBigF ] = true ;
       p[ :figNum ] = 3 ;
       p[ :logPlot ] = true ;
       p[ :figDesc ] = "ErrorAndCpuTimes" ;
@@ -192,7 +189,7 @@ function makefigures()
       PlotWaveforms( p ) ;
    end
 
-   if ( doAll3 || 0 )
+   if ( doAll3 || false )
       p = [ :fileName => "../circuits/halfWaveRectifier.netlist"  ] ;
       p[ :figName ] = "halfWaveRectifier" ;
       p[ :figNum ] = 2 ;
@@ -212,7 +209,7 @@ function makefigures()
       p[ :figNum ] = 3 ;
       p[ :yLabel ] = "Voltage (V)" ;
       p[ :figDesc ] = "DiodeCurrent" ;
-      p.title   = "Diode Current" ;
+      p[ :title ]   = "Diode Current" ;
       p[ :legends ] = [] ;
       p[ :nPlus ] = [ 3 ] ;
       p[ :nMinus ] = [ 0 ] ;
@@ -221,7 +218,7 @@ function makefigures()
       %PlotWaveforms( p ) ;
    end
 
-   if ( doAll2 || 0 )
+   if ( doAll2 || false )
       p = [ :fileName => "../circuits/halfWaveRectifierPow.netlist"  ] ;
       p[ :figName ] = "halfWaveRectifierPow" ;
       p[ :figNum ] = 2 ;
@@ -239,7 +236,7 @@ function makefigures()
       PlotWaveforms( p ) ;
    end
 
-   if ( doAll3 || 0 )
+   if ( doAll3 || false )
       % inputs:
       %V1 1 0 AC 10 1e6
       %D1 1 2 10e-12 25e-3
@@ -255,7 +252,7 @@ function makefigures()
       p[ :figNum ] = 3 ;
       p[ :logPlot ] = true ;
       p[ :figDesc ] = "ErrorAndCpuTimes" ;
-      p.title   = "Error and CPU times" ;
+      p[ :title ]   = "Error and CPU times" ;
       p[ :legends ] = [ "Normalized Error", "CPU Time" ] ;
       p[ :xLabel ] = "N (Number of Harmonics)" ;
       PlotWaveforms( p ) ;
@@ -274,7 +271,7 @@ function makefigures()
 
       %p[ :figNum ] = 5 ;
       %p[ :figDesc ] = "DiodeCurrent" ;
-      %p.title   = "Diode Current" ;
+      %p[ :title ]   = "Diode Current" ;
       %p[ :nPlus ] = [ 3 ] ;
       %p[ :nMinus ] = [ 0 ] ;
       %p[ :legends ] = [] ;
@@ -282,7 +279,7 @@ function makefigures()
       %PlotWaveforms( p ) ;
    end
 
-   if ( doAll3 || 0 )
+   if ( doAll3 || false )
       p = [ :fileName => "../circuits/simpleVrectSmallerCap.netlist"  ] ;
       p[ :figName ] = "typicalRectifierCircuitSmallerCap" ;
 
@@ -300,7 +297,7 @@ function makefigures()
 
       p[ :figNum ] = 3 ;
       p[ :figDesc ] = "DiodeCurrent" ;
-      p.title   = "Diode Current" ;
+      p[ :title ]   = "Diode Current" ;
       p[ :nPlus ] = [ 3 ] ;
       p[ :nMinus ] = [ 0 ] ;
       p[ :legends ] = [] ;
@@ -308,7 +305,7 @@ function makefigures()
       PlotWaveforms( p ) ;
    end
 
-   if ( doAll3 || 0 )
+   if ( doAll3 || false )
       f = figure ;
       hold on ;
 
@@ -336,16 +333,16 @@ function makefigures()
       p[ :yLabel ] = "Voltage (V)" ;
       PlotWaveforms( p ) ;
 
-      set( f, "Color", "w" ) ;
+      #set( f, "Color", "w" ) ;
 
       saveName = "halfWaveRectifierRangeOfCapValues.$fileExtension" ;
 
       savePlot( f, saveName ) ;
 
-      hold off ;
+      #hold off ;
    end
 
-   if ( doAll3 || 0 )
+   if ( doAll3 || false )
       f = figure ;
       hold on ;
 
@@ -384,19 +381,18 @@ function makefigures()
       p[ :yLabel ] = "Voltage (V)" ;
       PlotWaveforms( p ) ;
 
-      set( f, "Color", "w" ) ;
+      #set( f, "Color", "w" ) ;
 
       saveName = "halfWaveRectifierRangeOfCapValuesMultiSource.$fileExtension" ;
 
       savePlot( f, saveName ) ;
 
-      hold off ;
+      #hold off ;
    end
 
-   if ( doAll2 || 0 )
+   if ( doAll2 || false )
       p = [ :fileName => "../circuits/LCLowpass.netlist"  ] ;
       p[ :figName ] = "lowPassFilter" ;
-%      p[ :useBigF ] = false ;
 %      p[ :verbose ] = true ;
 
       p[ :xLabel ] = "Time (s)" ;
@@ -414,7 +410,7 @@ function makefigures()
       % to the gross attenuation of the output signal, and with respect to 
       % how much of the higher frequency signals get through the circuit).
       %
-      if ( 1 )
+      if ( true )
          p[ :nPlus ] = [ 1 5 ] ;
          p[ :nMinus ] = [ 0 0 ] ;
          p[ :legends ] = [ "Source Voltage", "Output Voltage" ] ;
@@ -444,15 +440,14 @@ function makefigures()
       PlotWaveforms( p ) ;
    end
 
-   if ( doAll || 0 )
+   if ( doAll || false )
       p = [ :fileName => "../circuits/square.netlist"  ] ;
       p[ :figName ] = "PowerLawAmplifiers" ;
 
-      p[ :useBigF ] = false ; % BigF Jacobian not implemented for this circuit.
       %p[ :allowCaching ] = false ;
       p[ :figNum ] = 1 ;
       p[ :figDesc ] = "Voltage" ;
-      p.title   = "Voltage" ;
+      p[ :title ]   = "Voltage" ;
       p[ :nPlus ] = [ 1 3 4 ] ;
       p[ :nMinus ] = [ 0 0 0 ] ;
       p[ :legends ] = [ "v_s", "v_s^2", "v_s^3" ] ;
