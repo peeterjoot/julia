@@ -23,3 +23,28 @@ c
 #  :THREE => 3.0
 #  :TWO   => 2
 
+keys(c)
+#KeyIterator for a Dict{Symbol,Any} with 4 entries. Keys:
+#  :ONE
+#  :BOOL
+#  :THREE
+#  :TWO
+
+for k in keys(c) ; println( k ) ; end
+#ONE
+#BOOL
+#THREE
+#TWO
+
+haskey(c, "one")
+#false
+
+haskey(c, "ONE")
+#false
+
+haskey(c, :ONE)
+#true
+
+haskey(c, :blah)
+#false
+

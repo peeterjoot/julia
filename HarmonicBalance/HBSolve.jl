@@ -8,7 +8,7 @@ end
 
 #=
   Uses the Harmonic Balance Method to solve the
-  steady state condtion of the circuit described in p.fileName.
+  steady state condtion of the circuit described in p[ :fileName ]
 
   Harmonic frequencies are limited to N.
 
@@ -17,7 +17,7 @@ end
   circuit using Newton's Method.
 =#
 function HBSolve( N, p )
-   # Dict of Symbol,Any: (could also use Union(Int,Bool,Float64)), but it may not buy much.
+   # Dict of Symbol,Any: (could replace Any with Union(Int,Bool,Float64))
    defp = [ :tolF =>             1e-6,
             :edV =>              1e-3,
             :JcondTol =>         1e-23,
@@ -28,45 +28,44 @@ function HBSolve( N, p )
             :dispfrequency =>    1,
             :maxStepMultiples => 50 ] ;
 
-   # FIXME: introduce parameter construction method that accounts for all this:
    # tolerances
-   if ( ~isfield( p, 'tolF' ) )
-      p.tolF = defp.tolF ;
+   if ( !haskey( p, :tolF ) )
+      p[ :tolF ] = defp[ :tolF ] ;
    end
-   if ( ~isfield( p, 'edV' ) )
-      p.edV = defp.edV ;
+   if ( !haskey( p, :edV ) )
+      p[ :edV ] = defp[ :edV ] ;
    end
 
    # maximum allowed Jacobian Condition
-   if ( ~isfield( p, 'JcondTol' ) )
-      p.JcondTol = defp.JcondTol ;
+   if ( !haskey( p, :JcondTol ) )
+      p[ :JcondTol ] = defp[ :JcondTol ] ;
    end
 
    # iteration limits
-   if ( ~isfield( p, 'iterations' ) )
-      p.iterations = defp.iterations ;
+   if ( !haskey( p, :iterations ) )
+      p[ :iterations ] = defp[ :iterations ] ;
    end
-   if ( ~isfield( p, 'subiterations' ) )
-      p.subiterations = defp.subiterations ;
+   if ( !haskey( p, :subiterations ) )
+      p[ :subiterations ] = defp[ :subiterations ] ;
    end
-   if ( ~isfield( p, 'minStep' ) )
-      p.minStep = defp.minStep ;
-   end
-
-   if ( ~isfield( p, 'dlambda' ) )
-      p.dlambda = defp.dlambda ;
+   if ( !haskey( p, :minStep ) )
+      p[ :minStep ] = defp[ :minStep ] ;
    end
 
-   if ( ~isfield( p, 'maxStepMultiples' ) )
-      p.maxStepMultiples = defp.maxStepMultiples ;
+   if ( !haskey( p, :dlambda ) )
+      p[ :dlambda ] = defp[ :dlambda ] ;
    end
 
-   if ( ~isfield( p, 'dispfrequency' ) )
-      p.dispfrequency = defp.dispfrequency ;
+   if ( !haskey( p, :maxStepMultiples ) )
+      p[ :maxStepMultiples ] = defp[ :maxStepMultiples ] ;
+   end
+
+   if ( !haskey( p, :dispfrequency ) )
+      p[ :dispfrequency ] = defp[ :dispfrequency ] ;
    end
 
 
-   r = NodalAnalysis( p.fileName ) ;
+   r = NodalAnalysis( p[ :fileName ] ) ;
 
    # Harmonic Balance Parameters
    # Only intend on using one frequency for all AC sources
@@ -77,13 +76,13 @@ function HBSolve( N, p )
    R = length( r.G ) ;
 
    # Newton's Method Parameters
-   if ( isfield( p, 'linearInit' ) && p.linearInit && (rcond( r.Y ) > 1e-6) )
+   if ( haskey( p, :linearInit ) && p[ :linearInit ] && (rcond( r.Y ) > 1e-6) )
       # suggested by wikipedia HB article: use the linear solution
       # as a seed, but this doesn't work out well for some circuits ( i.e. halfWaveRectifier )
       V0 = r.Y\r.I ;
-   elseif ( isfield( p, 'complexRandInit' ) && p.complexRandInit )
-      V0 = rand( R * ( 2 * N + 1 ), 1 ) + 1j * rand( R * ( 2 * N + 1 ), 1 ) ;
-   elseif ( isfield( p, 'randInit' ) && p.randInit )
+   elseif ( haskey( p, :complexRandInit ) && p[ :complexRandInit ] )
+      V0 = rand( R * ( 2 * N + 1 ), 1 ) + im * rand( R * ( 2 * N + 1 ), 1 ) ;
+   elseif ( haskey( p, :randInit ) && p[ :randInit ] )
       V0 = rand( R * ( 2 * N + 1 ), 1 ) ;
    else
       V0 = zeros( R * ( 2 * N + 1 ), 1 ) ;
@@ -94,10 +93,10 @@ function HBSolve( N, p )
    # Source Stepping
    lambda = 0 ;
    plambda = 0 ;
-   dlambda = p.dlambda ;
+   dlambda = p[ :dlambda ] ;
    converged = 0 ;
    ecputime = cputime ;
-   for i = 1:p.iterations
+   for i = 1:p[ :iterations ]
       V = V0 ;
 
       [Inl, JI] = DiodeCurrentAndJacobian( r, V ) ;
@@ -110,7 +109,7 @@ function HBSolve( N, p )
 
       # half wave rectifier (and perhaps other circuits) can't converge when lambda == 0.  have to start off bigger.
       if ( 0 == lambda )
-         #while ( ( jcond < p.JcondTol ) || isnan( jcond ) )
+         #while ( ( jcond < p[ :JcondTol ] ) || isnan( jcond ) )
 
 #         # First fall back to zeros for the initial vector.  Could alternately step that initial vector selection.
 #         if ( isnan( jcond ) )
@@ -125,7 +124,7 @@ function HBSolve( N, p )
          while ( isnan( jcond ) )
             println( "lambda: $dlambda, cond = $jcond" ) ;
 
-            dlambda = dlambda + p.dlambda ;
+            dlambda = dlambda + p[ :dlambda ] ;
 
             f = r.Y * V - Inl - dlambda * r.I ;
 
@@ -141,13 +140,13 @@ function HBSolve( N, p )
          plambda = dlambda ;
       end
 
-      if ( 0 == mod(i, p.dispfrequency) )
+      if ( 0 == mod(i, p[ :dispfrequency) ] )
          println( "iteration $i: lambda: $lambda, |V0| = ", norm( V0 ), ", cond = $jcond" ) ;
       end
 
       stepConverged = 0 ;
 
-      for k = 1:p.subiterations
+      for k = 1:p[ :subiterations ]
 
          # Newton Iteration Update
          dV = J\-f ;
@@ -162,12 +161,12 @@ function HBSolve( N, p )
          J = r.Y - JI ;
          jcond = rcond( J ) ;
 
-         if ( ( jcond < p.JcondTol ) || isnan( jcond ) )
+         if ( ( jcond < p[ :JcondTol ] ) || isnan( jcond ) )
             stepConverged = 0 ;
             break
          end
 
-         if ( norm( f ) < p.tolF ) || ( norm( dV ) < p.edV )
+         if ( norm( f ) < p[ :tolF ] ) || ( norm( dV ) < p[ :edV ] )
             stepConverged = 1 ;
             break ;
          end
@@ -180,10 +179,10 @@ function HBSolve( N, p )
          trialLambda = 2 * dlambda ;
 
          # don't allow the step size to go too many multiples bigger than the default step size if it has been decreased.
-         if ( trialLambda < (p.maxStepMultiples * p.dlambda) )
+         if ( trialLambda < ( p[ :maxStepMultiples ] * p[ :dlambda ] ) )
             dlambda = trialLambda ;
          else
-            dlambda = p.dlambda ;
+            dlambda = p[ :dlambda ] ;
          end
 
          plambda = lambda ;
@@ -205,16 +204,14 @@ function HBSolve( N, p )
          lambda = 1 ;
       end
 
-      if ( dlambda <= p.minStep )
-#save( 'a.mat' ) ;
-         throw( "source load step $dlambda too small (> $(p.minStep)), function not converging" ) ;
+      if ( dlambda <= p[ :minStep ] )
+         throw( "source load step $dlambda too small (> ", p[ :minStep ], "), function not converging" ) ;
       end
    end
 
    ecputime = cputime - ecputime ;
 
    if ( converged )
-#save( 'b.mat' ) ;
       println( "solution converged after ", num2str( totalIterations ), " iterations " ) ;
    else
       println( "solution did not converge after ", num2str( totalIterations ), " iterations " ) ;
