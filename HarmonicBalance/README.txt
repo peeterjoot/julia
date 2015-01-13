@@ -26,16 +26,16 @@ STARTED:
 
       Precalculate matrices that can be used repeatedly in DiodeCurrentAndJacobian.
 
+   DiodeCurrentAndJacobian.jl
+
+      Do the V dependent parts of the I(V) and J(V) current and Jacobian calculations.
+
 -------------------------------------------------------------------
 
 ... some new Julia specific FIXMEs to deal with.
 
 TODO: 
 -------------------------------------------------------------------
-
-   DiodeCurrentAndJacobian.m
-
-      Do the V dependent parts of the I(V) and J(V) current and Jacobian calculations.
 
 -------------------------------------------------------------------
 Plotting and test related:
