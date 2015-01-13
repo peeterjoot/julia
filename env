@@ -10,4 +10,4 @@ PATH=/cygdrive/c/Users/IBM_ADMIN/AppData/Local/Julia-0.3.4/bin:"$PATH"
 #
 # ipython:
 #C:\Users\IBM_ADMIN\Anaconda\Scripts
-PATH=/cygdrive/c/Users/IBM_ADMIN/Anaconda/Scripts:$PATH
+#PATH=/cygdrive/c/Users/IBM_ADMIN/Anaconda/Scripts:$PATH
