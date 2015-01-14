@@ -170,7 +170,7 @@ function PlotWaveforms( p )
       mErr = pErr(1) 
 
    else
-      for m = 1:numPlots
+      for m in 1:numPlots
          hold on ;
 
          if ( p[ :spectrum ] )

@@ -30,7 +30,7 @@ function TestSolver( p )
    ecputimeValues = zeros( M, 1 ) ;
    errorValues = zeros( M, 1 ) ;
    n = 0 ;
-   for N = Nvalues
+   for N in Nvalues
       hn = HBSolve( N, p ) ;
       #v        = hn[ :v ] ;
       V        = hn[ :V ] ;

@@ -19,7 +19,7 @@ function DiodeCurrentAndJacobian( in, V )
    II = zeros( vSize, 1 ) ;
    JI = zeros( vSize, vSize ) ;
 
-   for i = 1:S
+   for i in 1:S
       H = in[ :nonlinearMatrices ][ i ].H ;
 
       powerType = ( in[ :nonlinear ][ i ].type == :POWER ) ;
@@ -31,7 +31,7 @@ function DiodeCurrentAndJacobian( in, V )
       eeprime = zeros( twoNplusOne, 1 ) ;
       he = zeros( twoNplusOne, vSize ) ;
 
-      for j = 1:twoNplusOne
+      for j in 1:twoNplusOne
          ht = H[ j, : ] ;
 
          x = ht * V ;

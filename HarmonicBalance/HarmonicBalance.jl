@@ -130,8 +130,8 @@ function HarmonicBalance( inputs, N, omega )
    r = 0 ;
    s = 0 ;
    q = 0 ;
-   for n = -N:N
-      for m = 1:R
+   for n in -N:N
+      for m in 1:R
          r = r + 1 ;
          xm = xnames[m] ;
          Vnames[r] = "$xm:$n" ;

@@ -14,16 +14,19 @@ end
 function DiodeNonVdependent( p )
 
    nonlinear = p[ :nonlinear ] ;
+   D = p[ :D ] ;
+   F = p[ :F ] ;
+   Finv = p[ :Finv ] ;
 
    S = length( nonlinear ) ;
-   dsz = size( p[ :D ], 1 ) ;
-   #traceit( "entry:  S = $S, dsz = $dsz" ) ;
+   dsz = size( D, 1 ) ;
+   traceit( "entry:  S = $S, dsz = $dsz" ) ;
 
    vSize = length( p[ :Y ] ) ;
-   twoNplusOne = size( p[ :F ], 1 ) ;
+   twoNplusOne = size( F, 1 ) ;
    nonlinearMatrices = NonlinearMatrices_T[] ;
 
-   for i = 1:S
+   for i in 1:S
       #traceit( "$i" ) ;
       dio = nonlinear[i] ;
 
@@ -31,24 +34,24 @@ function DiodeNonVdependent( p )
       outerD = spzerosT( vSize, twoNplusOne, 0.0 ) ;
 
       vecInnerD = spzerosT( dsz, 1, 0 ) ;
-      vecOuterD = p[ :D ][ :, i ] ;
+      vecOuterD = D[ :, i ] ;
 
       # for Ennnn non-linear terms the selector of the vp/vn components differs from the scale of the non-linear contribution:
-      if ( dio.vp )
+      if ( dio.vp != 0 )
          vecInnerD[ dio.vp ] = 1 ;
       end
-      if ( dio.vn )
+      if ( dio.vn != 0 )
          vecInnerD[ dio.vn ] = -1 ;
       end
 
-      for j = 1:twoNplusOne
+      for j in 1:twoNplusOne
          innerD[ 1 + (j-1) * dsz : j * dsz, j ] = vecInnerD ;
          outerD[ 1 + (j-1) * dsz : j * dsz, j ] = vecOuterD ;
       end
 
-      A = dio.io * outerD * p[ :Finv ] ;
+      A = dio.magnitude * outerD * Finv ;
 
-      H = p[ :F ] * innerD.' /dio.vt ;
+      H = F * innerD.' /dio.vt ;
 
       # don't really have to cache innerD,outerD but keep for debug for now.
       nl = NonlinearMatrices_T( innerD, outerD, H, A ) ;

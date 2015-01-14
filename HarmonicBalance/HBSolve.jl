@@ -1,4 +1,5 @@
 using Netlist ;
+using CPUTime ;
 
 #=
   Uses the Harmonic Balance Method to solve the
@@ -30,22 +31,25 @@ function HBSolve( N, p )
 
    r = NodalAnalysis( p[ :fileName ] ) ;
 
-println( r[ :angularVelocities ] ) ;
    # Harmonic Balance Parameters
    # Only intend on using one frequency for all AC sources
 
-# FIXME: not working:  how did I do it elsewhere?
-   omega = min( r[ :angularVelocities ]( r[ :angularVelocities ] .> 0 ) ) ;
+   a = r[ :angularVelocities ] ;
+   omega = minimum( a[ a .> 0 ] ) ;
 
    r = HarmonicBalance( r, N, omega ) ;
-#=
-   R = length( r[ :G ] ) ;
+
+   G = r[ :G ] ;
+   Y = r[ :Y ] ;
+   I = r[ :I ] ;
+   F = r[ :F ] ;
+   R = length( G ) ;
 
    # Newton's Method Parameters
-   if ( haskey( p, :linearInit ) && p[ :linearInit ] && (rcond( r[ :Y ] ) > 1e-6) )
+   if ( haskey( p, :linearInit ) && p[ :linearInit ] && (rcond( Y ) > 1e-6) )
       # suggested by wikipedia HB article: use the linear solution
       # as a seed, but this doesn't work out well for some circuits ( i.e. halfWaveRectifier )
-      V0 = r[ :Y ]\r[ :I ] ;
+      V0 = Y\I ;
    elseif ( haskey( p, :complexRandInit ) && p[ :complexRandInit ] )
       V0 = rand( R * ( 2 * N + 1 ), 1 ) + im * rand( R * ( 2 * N + 1 ), 1 ) ;
    elseif ( haskey( p, :randInit ) && p[ :randInit ] )
@@ -60,17 +64,20 @@ println( r[ :angularVelocities ] ) ;
    lambda = 0 ;
    plambda = 0 ;
    dlambda = p[ :dlambda ] ;
-   converged = 0 ;
-   ecputime = cputime ;
-   for i = 1:p[ :iterations ]
+   converged = false ;
+   ecputime = CPUtime_us() ;
+println( p[ :iterations ] ) ;
+
+#=
+   for i in 1:p[ :iterations ]
       V = V0 ;
 
       [Inl, JI] = DiodeCurrentAndJacobian( r, V ) ;
 
       # Function to minimize:
-      f = r[ :Y ] * V - Inl - lambda * r[ :I ] ;
+      f = Y * V - Inl - lambda * I ;
 
-      J = r[ :Y ] - JI ;
+      J = Y - JI ;
       jcond = rcond( J ) ;
 
       # half wave rectifier (and perhaps other circuits) can't converge when lambda == 0.  have to start off bigger.
@@ -81,9 +88,9 @@ println( r[ :angularVelocities ] ) ;
 #         if ( isnan( jcond ) )
 #            V0 = zeros( R * ( 2 * N + 1 ), 1 ) ;
 #            V = V0 ;
-#            f = r[ :Y ] * V - Inl - dlambda * r[ :I ] ;
+#            f = Y * V - Inl - dlambda * I ;
 #
-#            J = r[ :Y ] - JI ;
+#            J = Y - JI ;
 #            jcond = rcond( J ) ;
 #         end
 
@@ -92,9 +99,9 @@ println( r[ :angularVelocities ] ) ;
 
             dlambda = dlambda + p[ :dlambda ] ;
 
-            f = r[ :Y ] * V - Inl - dlambda * r[ :I ] ;
+            f = Y * V - Inl - dlambda * I ;
 
-            J = r[ :Y ] - JI ;
+            J = Y - JI ;
             jcond = rcond( J ) ;
 
             if ( dlambda > 1 )
@@ -110,9 +117,9 @@ println( r[ :angularVelocities ] ) ;
          println( "iteration $i: lambda: $lambda, |V0| = ", norm( V0 ), ", cond = $jcond" ) ;
       end
 
-      stepConverged = 0 ;
+      stepConverged = false ;
 
-      for k = 1:p[ :subiterations ]
+      for k in 1:p[ :subiterations ]
 
          # Newton Iteration Update
          dV = J\-f ;
@@ -121,19 +128,19 @@ println( r[ :angularVelocities ] ) ;
          [Inl, JI] = DiodeCurrentAndJacobian( r, V ) ;
 
          # Function to minimize:
-         f = r[ :Y ] * V - Inl - lambda * r[ :I ] ;
+         f = Y * V - Inl - lambda * I ;
 
          # Construct Jacobian
-         J = r[ :Y ] - JI ;
+         J = Y - JI ;
          jcond = rcond( J ) ;
 
          if ( ( jcond < p[ :JcondTol ] ) || isnan( jcond ) )
-            stepConverged = 0 ;
+            stepConverged = false ;
             break
          end
 
          if ( norm( f ) < p[ :tolF ] ) || ( norm( dV ) < p[ :edV ] )
-            stepConverged = 1 ;
+            stepConverged = true ;
             break ;
          end
       end
@@ -161,8 +168,8 @@ println( r[ :angularVelocities ] ) ;
 
       totalIterations = totalIterations + k ;
 
-      if ( plambda == 1 && stepConverged == 1 )
-         converged = 1 ;
+      if ( plambda == 1 && stepConverged )
+         converged = true ;
          break ;
       end
 
@@ -175,30 +182,31 @@ println( r[ :angularVelocities ] ) ;
       end
    end
 
-   ecputime = cputime - ecputime ;
+   ecputime = CPUtime_us() - ecputime ;
 
    if ( converged )
-      println( "solution converged after ", num2str( totalIterations ), " iterations " ) ;
+      println( "solution converged after $totalIterations iterations" ) ;
    else
-      println( "solution did not converge after ", num2str( totalIterations ), " iterations " ) ;
+      println( "solution did not converge after $totalIterations iterations" ) ;
    end
 
    # also return a time domain conversion right out of the box:
    v = zeros( size( V ) ) ;
-   for i = 1:R
-      v[ i : R : end ] = r[ :F ] * V[ i : R : end ] ;
+   for i in 1:R
+      v[ i : R : end ] = F * V[ i : R : end ] ;
    end
+=#
 
    # return this function's data along with the return data from HarmonicBalance().
    h = r ;
 
+#=
    h[ :v ]        = v ;
    h[ :V ]        = V ;
+=#
    h[ :ecputime ] = ecputime ;
    h[ :omega ]    = omega ;
    h[ :R ]        = R ;
 
-=#
-   h = r ;
    h ;
 end
