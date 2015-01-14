@@ -1,3 +1,5 @@
+using Netlist ;
+
 #=
   Uses the Harmonic Balance Method to solve the
   steady state condtion of the circuit described in p[ :fileName ]
@@ -20,58 +22,30 @@ function HBSolve( N, p )
             :dispfrequency =>    1,
             :maxStepMultiples => 50 ] ;
 
-   # tolerances
-   if ( !haskey( p, :tolF ) )
-      p[ :tolF ] = defp[ :tolF ] ;
+   for k in keys( defp )
+      if ( !haskey( p, k ) )
+         p[ k ] = defp[ k ] ;
+      end
    end
-   if ( !haskey( p, :edV ) )
-      p[ :edV ] = defp[ :edV ] ;
-   end
-
-   # maximum allowed Jacobian Condition
-   if ( !haskey( p, :JcondTol ) )
-      p[ :JcondTol ] = defp[ :JcondTol ] ;
-   end
-
-   # iteration limits
-   if ( !haskey( p, :iterations ) )
-      p[ :iterations ] = defp[ :iterations ] ;
-   end
-   if ( !haskey( p, :subiterations ) )
-      p[ :subiterations ] = defp[ :subiterations ] ;
-   end
-   if ( !haskey( p, :minStep ) )
-      p[ :minStep ] = defp[ :minStep ] ;
-   end
-
-   if ( !haskey( p, :dlambda ) )
-      p[ :dlambda ] = defp[ :dlambda ] ;
-   end
-
-   if ( !haskey( p, :maxStepMultiples ) )
-      p[ :maxStepMultiples ] = defp[ :maxStepMultiples ] ;
-   end
-
-   if ( !haskey( p, :dispfrequency ) )
-      p[ :dispfrequency ] = defp[ :dispfrequency ] ;
-   end
-
 
    r = NodalAnalysis( p[ :fileName ] ) ;
 
+println( r[ :angularVelocities ] ) ;
    # Harmonic Balance Parameters
    # Only intend on using one frequency for all AC sources
-   #omega = min( r.angularVelocities( find ( r.angularVelocities > 0 ) ) ) ;
-   omega = min( r.angularVelocities( r.angularVelocities > 0 ) ) ;
+
+# FIXME: not working:  how did I do it elsewhere?
+   omega = min( r[ :angularVelocities ]( r[ :angularVelocities ] .> 0 ) ) ;
 
    r = HarmonicBalance( r, N, omega ) ;
-   R = length( r.G ) ;
+#=
+   R = length( r[ :G ] ) ;
 
    # Newton's Method Parameters
-   if ( haskey( p, :linearInit ) && p[ :linearInit ] && (rcond( r.Y ) > 1e-6) )
+   if ( haskey( p, :linearInit ) && p[ :linearInit ] && (rcond( r[ :Y ] ) > 1e-6) )
       # suggested by wikipedia HB article: use the linear solution
       # as a seed, but this doesn't work out well for some circuits ( i.e. halfWaveRectifier )
-      V0 = r.Y\r.I ;
+      V0 = r[ :Y ]\r[ :I ] ;
    elseif ( haskey( p, :complexRandInit ) && p[ :complexRandInit ] )
       V0 = rand( R * ( 2 * N + 1 ), 1 ) + im * rand( R * ( 2 * N + 1 ), 1 ) ;
    elseif ( haskey( p, :randInit ) && p[ :randInit ] )
@@ -94,9 +68,9 @@ function HBSolve( N, p )
       [Inl, JI] = DiodeCurrentAndJacobian( r, V ) ;
 
       # Function to minimize:
-      f = r.Y * V - Inl - lambda * r.I ;
+      f = r[ :Y ] * V - Inl - lambda * r[ :I ] ;
 
-      J = r.Y - JI ;
+      J = r[ :Y ] - JI ;
       jcond = rcond( J ) ;
 
       # half wave rectifier (and perhaps other circuits) can't converge when lambda == 0.  have to start off bigger.
@@ -107,9 +81,9 @@ function HBSolve( N, p )
 #         if ( isnan( jcond ) )
 #            V0 = zeros( R * ( 2 * N + 1 ), 1 ) ;
 #            V = V0 ;
-#            f = r.Y * V - Inl - dlambda * r.I ;
+#            f = r[ :Y ] * V - Inl - dlambda * r[ :I ] ;
 #
-#            J = r.Y - JI ;
+#            J = r[ :Y ] - JI ;
 #            jcond = rcond( J ) ;
 #         end
 
@@ -118,9 +92,9 @@ function HBSolve( N, p )
 
             dlambda = dlambda + p[ :dlambda ] ;
 
-            f = r.Y * V - Inl - dlambda * r.I ;
+            f = r[ :Y ] * V - Inl - dlambda * r[ :I ] ;
 
-            J = r.Y - JI ;
+            J = r[ :Y ] - JI ;
             jcond = rcond( J ) ;
 
             if ( dlambda > 1 )
@@ -132,7 +106,7 @@ function HBSolve( N, p )
          plambda = dlambda ;
       end
 
-      if ( 0 == ( i % p[ :dispfrequency) ) )
+      if ( 0 == ( i % p[ :dispfrequency ] ) )
          println( "iteration $i: lambda: $lambda, |V0| = ", norm( V0 ), ", cond = $jcond" ) ;
       end
 
@@ -147,10 +121,10 @@ function HBSolve( N, p )
          [Inl, JI] = DiodeCurrentAndJacobian( r, V ) ;
 
          # Function to minimize:
-         f = r.Y * V - Inl - lambda * r.I ;
+         f = r[ :Y ] * V - Inl - lambda * r[ :I ] ;
 
          # Construct Jacobian
-         J = r.Y - JI ;
+         J = r[ :Y ] - JI ;
          jcond = rcond( J ) ;
 
          if ( ( jcond < p[ :JcondTol ] ) || isnan( jcond ) )
@@ -212,7 +186,7 @@ function HBSolve( N, p )
    # also return a time domain conversion right out of the box:
    v = zeros( size( V ) ) ;
    for i = 1:R
-      v[ i : R : end ] = r.F * V[ i : R : end ] ;
+      v[ i : R : end ] = r[ :F ] * V[ i : R : end ] ;
    end
 
    # return this function's data along with the return data from HarmonicBalance().
@@ -224,5 +198,7 @@ function HBSolve( N, p )
    h[ :omega ]    = omega ;
    h[ :R ]        = R ;
 
+=#
+   h = r ;
    h ;
 end

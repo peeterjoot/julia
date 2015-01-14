@@ -6,13 +6,11 @@ Infrastructure:
       Parse the netlist file and return the time domain MNA equation matrices and an
       encoding of any non-linear elements.
 
-   FIXME: 1) cell => string array conversion.
-
    FourierMatrixComplex.jl
 
       Compute the "Small F" Fourier matrix for the discrete Fourier transform.
 
-      (FIXME: Should use FFT instead)
+      (Should use FFT instead)
 
    HarmonicBalance.jl
       Construct the Frequency domain equivalents of the linear portions of the network.
@@ -40,16 +38,18 @@ Solver:
 -------------------------------------------------------------------
 Plotting and test related:
 
+   TestSolver.jl
+      Generates the cputime/error plots
+
    PlotWaveforms.jl
       Calls HBSolve() for a netlist file and caches the result.
       Then plots the results using a set of plot specifications.
 
-   TestSolver.jl
-      Generates the cputime/error plots
+      FIXME: 1) won't work as is.
 
    makefigures.jl
       Driver for all the plots.  Calls PlotWaveforms()
 
-         Has references to saveHelper() to deal with.
+      FIXME: 1) Has references to saveHelper() to deal with.
 
 -------------------------------------------------------------------

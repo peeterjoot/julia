@@ -117,11 +117,11 @@ function PlotWaveforms( p )
 #p
    if ( !p[ :logPlot ] )
 
-      v = h.v ;
-      V = h.V ;
-      R = h.R ;
+      v = h[ :v ] ;
+      V = h[ :V ] ;
+      R = h[ :R ] ;
 
-      f0 = h.omega/( 2 * pi ) ;
+      f0 = h[ :omega ]/( 2 * pi ) ;
       T = 1/f0 ;
       dt = T/( 2 * N + 1 ) ;
       k = -N:N ;
@@ -134,7 +134,7 @@ function PlotWaveforms( p )
    end
 
    if ( haskey( p, :verbose ) )
-      h.xnames
+      h[ :xnames ]
    end
 
    if ( !haskey( p, :spectrum ) )
@@ -152,11 +152,11 @@ function PlotWaveforms( p )
 
    if ( p[ :logPlot ] )
 
-      loglog( h.Nvalues, h.errorValues, '-o', h.Nvalues, h.ecputimeValues, '-o', 'linewidth', 2 ) ;
+      loglog( h[ :Nvalues ], h[ :errorValues ], '-o', h[ :Nvalues ], h[ :ecputimeValues ], '-o', 'linewidth', 2 ) ;
 
-      logN = log( h.Nvalues.' ) ;
-      logErr = log( h.errorValues ) ;
-      logCpu = log( h.ecputimeValues ) ;
+      logN = log( h[ :Nvalues ].' ) ;
+      logErr = log( h[ :errorValues ] ) ;
+      logCpu = log( h[ :ecputimeValues ] ) ;
 
       #plot( logN, logErr, '-o', logN, logCpu, '-o', 'linewidth', 2 ) ;
 

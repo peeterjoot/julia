@@ -101,8 +101,6 @@
 ------------------------------------------------
 =#
 
-using pd ;
-
 function HarmonicBalance( inputs, N, omega )
 
    results = inputs ;    # return these for convienence.
@@ -124,8 +122,7 @@ function HarmonicBalance( inputs, N, omega )
    end
 
    Y = zeros( twoNplusOne * R, twoNplusOne * R ) ;
-# FIXME: this should be array of string
-   Vnames = cell( twoNplusOne * R, 1 ) ;
+   Vnames = Array( String, twoNplusOne * R, 1 ) ;
    I = zeros( twoNplusOne * R, 1 ) ;
 
    jOmega = im * omega ;
@@ -144,17 +141,19 @@ function HarmonicBalance( inputs, N, omega )
       s = s + R ;
 
       thisOmega = omega * n ;
-      omegaIndex = find( angularVelocities == thisOmega ) ;
+      omegaIndex = findin( angularVelocities, thisOmega ) ;
 
       nu0 = omega/(2 * pi) ;
       traceit( "HarmonicBalance: n=$n, nu_0 = $nu0, omegaIndex = $omegaIndex" ) ;
 
-      if ( size(omegaIndex) == size(1) )
-         # found one (not an error not to find a matching frequency.  Our input sources may not have all the frequencies that
-         # we allow in our bandwidth limited Harmonic Balance DFT representation.
+      if ( length(omegaIndex) != 0 )
+         # found one:
 
          I[ q+1:q+R ] = B[ :, omegaIndex ] ;
       else
+         # Not an error to not find a matching frequency.  Our input sources may not have all the frequencies that
+         # we allow in our bandwidth limited Harmonic Balance DFT representation.
+
          #traceit( "HarmonicBalance: no omega match from: $angularVelocities" ) ;
       end
       q = q + R ;
@@ -164,20 +163,20 @@ function HarmonicBalance( inputs, N, omega )
    results[ :I ] = I ;
    results[ :Vnames ] = Vnames ;
 
-   %-----------------
-   % precalculate the Fourier transform matrix pairs and cache them:
+   #-----------------
+   # precalculate the Fourier transform matrix pairs and cache them:
    F = FourierMatrixComplex( N ) ;
 
    Finv = conj( F )/ twoNplusOne ;
 
    results[ :F ] = F ;
    results[ :Finv ] = Finv ;
-   %-----------------
+   #-----------------
 
    nm = DiodeNonVdependent( results ) ;
    results[ :nonlinearMatrices ] = nm ;
 
-   %-----------------
+   #-----------------
 
    results ;
 end

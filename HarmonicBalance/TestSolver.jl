@@ -11,11 +11,11 @@ function TestSolver( p )
    # Reference Harmonic Balance Parameters
    Nref = 100 ;
    h = HBSolve( Nref, p ) ;
-   #xref        = h.v ;
-   Xref        = h.V ;
-   ecputimeref = h.ecputime ;
-   omegaref    = h.omega ;
-   #Rref        = h.R ;
+   #xref        = h[ :v ] ;
+   Xref        = h[ :V ] ;
+   ecputimeref = h[ :ecputime ] ;
+   omegaref    = h[ :omega ] ;
+   #Rref        = h[ :R ] ;
 
    f0ref = omegaref/( 2 * pi ) ;
    Tref = 1/f0ref ;
@@ -32,11 +32,11 @@ function TestSolver( p )
    n = 0 ;
    for N = Nvalues
       hn = HBSolve( N, p ) ;
-      #v        = hn.v ;
-      V        = hn.V ;
-      ecputime = hn.ecputime ;
-      omega    = hn.omega ;
-      R        = hn.R ;
+      #v        = hn[ :v ] ;
+      V        = hn[ :V ] ;
+      ecputime = hn[ :ecputime ] ;
+      omega    = hn[ :omega ] ;
+      R        = hn[ :R ] ;
 
       # Harmonic Balance Parameters
       f0 = omega/( 2 * pi ) ;
@@ -50,12 +50,16 @@ function TestSolver( p )
       Xz = [ zeros( R * ( Nref - N ), 1 ) ; V ; zeros( R * ( Nref - N ), 1 ) ] ;
       eX = norm( Xz - Xref ) ;
       n = n + 1 ;
-      errorValues( n ) = eX ;
-      ecputimeValues( n ) = ecputime ;
+      errorValues[ n ] = eX ;
+      ecputimeValues[ n ] = ecputime ;
    end
    Nvalues = [ Nvalues Nref ] ;
    errorValues = [ errorValues ; 0 ] ;
    ecputimeValues = [ ecputimeValues ; ecputimeref ] ;
 
-   [ :Nvalues => Nvalues, :errorValues => errorValues, :ecputimeValues => ecputimeValues ] ;
+   [ 
+     :Nvalues        => Nvalues,
+     :errorValues    => errorValues,
+     :ecputimeValues => ecputimeValues
+   ] ;
 end

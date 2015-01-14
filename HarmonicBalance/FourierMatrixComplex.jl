@@ -1,11 +1,3 @@
-# https://github.com/JuliaLang/julia/blob/master/examples/ndgrid.jl
-function ndgrid{T}(v1::AbstractVector{T}, v2::AbstractVector{T})
-    m, n = length(v1), length(v2)
-    v1 = reshape(v1, m, 1)
-    v2 = reshape(v2, 1, n)
-    (repmat(v1, 1, n), repmat(v2, m, 1))
-end
-
 #=
    FourierMatrixComplex Function to determine the fourier matrix for the discrete
    fourier transform and its inverse.

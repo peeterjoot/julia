@@ -387,6 +387,8 @@ module Netlist
 
             push!( linesInfo.diode, i ) ;
 
+            push!( allFrequencies, 0.0 ) ;
+
             continue ;
          end
 
