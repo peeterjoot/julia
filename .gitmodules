@@ -1,0 +1,3 @@
+[submodule "CPUTime.jl"]
+	path = CPUTime.jl
+	url = git@github.com:schmrlng/CPUTime.jl.git
