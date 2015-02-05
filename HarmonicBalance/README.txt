@@ -1,4 +1,23 @@
 -------------------------------------------------------------------
+
+How to run this:
+
+workspace() ; using HB ; include("makefigures.jl")
+
+julia> workspace() ; using HB ; include("makefigures.jl")
+
+... hit errors that I thought might be due to rcond() "implementation" (myrcond).  but testing with:
+
+x = [1 1e-14 ; 1 1e-8]
+
+in matlab and Julia look like matlab's rcond() == Julia's 1/cond().
+
+Wonder if this is
+
+- types (initializing as zeros, not complex zeros)?
+- scoping?
+
+-------------------------------------------------------------------
 Infrastructure:
 
    NodalAnalysis.jl
@@ -16,13 +35,15 @@ Infrastructure:
       Construct the Frequency domain equivalents of the linear portions of the network.
       Consumes results from NodalAnalysis().
 
-      FIXME: 1) deal with find() call.
+      FIXME: 1) deal with find() call. ... have findin, not find?
 
    HBSolve.jl
       Harmonic Balance workhorse. 
 
-      FIXME: 1) array references to translate.
-      FIXME: 1) min (omega) stuff.
+      FIXME: 1) array references to translate. ... what did I mean by that.
+      FIXME: 2) min (omega) stuff.
+
+      See there's a bunch of stuff commented out.
 
 -------------------------------------------------------------------
 Solver:

@@ -1,5 +1,11 @@
-clear all equivalent:
-http://stackoverflow.com/questions/25028873/how-do-i-reload-a-module-in-an-active-julia-session-after-an-edit
+* clear all equivalent:
 
-workspace()
+   http://stackoverflow.com/questions/25028873/how-do-i-reload-a-module-in-an-active-julia-session-after-an-edit
 
+   workspace()
+
+* include some code to run:
+
+   include("blah.jl")
+
+*

@@ -121,9 +121,9 @@ function HarmonicBalance( inputs, N, omega )
       throw( "HarmonicBalance:squareCheck: expected G ($szG) to be square" ) ;
    end
 
-   Y = zeros( twoNplusOne * R, twoNplusOne * R ) ;
+   Y = zeros( Complex{Float64}, twoNplusOne * R, twoNplusOne * R ) ;
    Vnames = Array( String, twoNplusOne * R, 1 ) ;
-   I = zeros( twoNplusOne * R, 1 ) ;
+   I = zeros( Complex{Float64}, twoNplusOne * R, 1 ) ;
 
    jOmega = im * omega ;
 

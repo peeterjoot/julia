@@ -1,6 +1,11 @@
 using Netlist ;
 using CPUTime ;
 
+# http://stackoverflow.com/questions/28335231/is-there-an-equivalent-to-matlabs-rcond-function-in-julia
+function myrcond( m )
+   1/cond( m ) ; 
+end
+
 #=
   Uses the Harmonic Balance Method to solve the
   steady state condtion of the circuit described in p[ :fileName ]
@@ -46,17 +51,20 @@ function HBSolve( N, p )
    R = length( G ) ;
 
    # Newton's Method Parameters
-   if ( haskey( p, :linearInit ) && p[ :linearInit ] && (rcond( Y ) > 1e-6) )
+   if ( haskey( p, :linearInit ) && p[ :linearInit ] && (myrcond( Y ) > 1e-6) )
       # suggested by wikipedia HB article: use the linear solution
       # as a seed, but this doesn't work out well for some circuits ( i.e. halfWaveRectifier )
       V0 = Y\I ;
    elseif ( haskey( p, :complexRandInit ) && p[ :complexRandInit ] )
-      V0 = rand( R * ( 2 * N + 1 ), 1 ) + im * rand( R * ( 2 * N + 1 ), 1 ) ;
+      V0 = rand( Complex{Float64}, R * ( 2 * N + 1 ), 1 ) ;
    elseif ( haskey( p, :randInit ) && p[ :randInit ] )
       V0 = rand( R * ( 2 * N + 1 ), 1 ) ;
    else
-      V0 = zeros( R * ( 2 * N + 1 ), 1 ) ;
+      V0 = zeros( Complex{Float64}, R * ( 2 * N + 1 ), 1 ) ;
    end
+
+   # Julia porting hack.  Assign once so it stays in scope for later:
+   V = V0 ;
 
    totalIterations = 0 ;
 
@@ -66,20 +74,20 @@ function HBSolve( N, p )
    dlambda = p[ :dlambda ] ;
    converged = false ;
    ecputime = CPUtime_us() ;
-println( p[ :iterations ] ) ;
+#println( p[ :iterations ] ) ;
 
-#=
    for i in 1:p[ :iterations ]
       V = V0 ;
 
-      [Inl, JI] = DiodeCurrentAndJacobian( r, V ) ;
+      (Inl, JI) = DiodeCurrentAndJacobian( r, V ) ;
 
       # Function to minimize:
       f = Y * V - Inl - lambda * I ;
 
       J = Y - JI ;
-      jcond = rcond( J ) ;
+      jcond = myrcond( J ) ;
 
+#println( "lambda: $lambda" ) ;
       # half wave rectifier (and perhaps other circuits) can't converge when lambda == 0.  have to start off bigger.
       if ( 0 == lambda )
          #while ( ( jcond < p[ :JcondTol ] ) || isnan( jcond ) )
@@ -91,7 +99,7 @@ println( p[ :iterations ] ) ;
 #            f = Y * V - Inl - dlambda * I ;
 #
 #            J = Y - JI ;
-#            jcond = rcond( J ) ;
+#            jcond = myrcond( J ) ;
 #         end
 
          while ( isnan( jcond ) )
@@ -102,7 +110,7 @@ println( p[ :iterations ] ) ;
             f = Y * V - Inl - dlambda * I ;
 
             J = Y - JI ;
-            jcond = rcond( J ) ;
+            jcond = myrcond( J ) ;
 
             if ( dlambda > 1 )
                throw( "could not find an initital source load step" ) ;
@@ -119,20 +127,24 @@ println( p[ :iterations ] ) ;
 
       stepConverged = false ;
 
+      lastK = 0 ;
+
       for k in 1:p[ :subiterations ]
 
          # Newton Iteration Update
          dV = J\-f ;
          V = V + dV ;
 
-         [Inl, JI] = DiodeCurrentAndJacobian( r, V ) ;
+         (Inl, JI) = DiodeCurrentAndJacobian( r, V ) ;
 
          # Function to minimize:
          f = Y * V - Inl - lambda * I ;
 
          # Construct Jacobian
          J = Y - JI ;
-         jcond = rcond( J ) ;
+         jcond = myrcond( J ) ;
+
+         lastK = k ;
 
          if ( ( jcond < p[ :JcondTol ] ) || isnan( jcond ) )
             stepConverged = false ;
@@ -166,7 +178,7 @@ println( p[ :iterations ] ) ;
          lambda = plambda + dlambda ;
       end
 
-      totalIterations = totalIterations + k ;
+      totalIterations = totalIterations + lastK ;
 
       if ( plambda == 1 && stepConverged )
          converged = true ;
@@ -183,7 +195,6 @@ println( p[ :iterations ] ) ;
    end
 
    ecputime = CPUtime_us() - ecputime ;
-
    if ( converged )
       println( "solution converged after $totalIterations iterations" ) ;
    else
@@ -191,19 +202,16 @@ println( p[ :iterations ] ) ;
    end
 
    # also return a time domain conversion right out of the box:
-   v = zeros( size( V ) ) ;
+   v = zeros( Complex{Float64}, size( V ) ) ;
    for i in 1:R
       v[ i : R : end ] = F * V[ i : R : end ] ;
    end
-=#
 
    # return this function's data along with the return data from HarmonicBalance().
    h = r ;
 
-#=
    h[ :v ]        = v ;
    h[ :V ]        = V ;
-=#
    h[ :ecputime ] = ecputime ;
    h[ :omega ]    = omega ;
    h[ :R ]        = R ;

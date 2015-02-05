@@ -22,7 +22,8 @@ function DiodeNonVdependent( p )
    dsz = size( D, 1 ) ;
    traceit( "entry:  S = $S, dsz = $dsz" ) ;
 
-   vSize = length( p[ :Y ] ) ;
+   szY = size( p[ :Y ] ) ;
+   vSize = szY[1] ;
    twoNplusOne = size( F, 1 ) ;
    nonlinearMatrices = NonlinearMatrices_T[] ;
 
@@ -32,6 +33,7 @@ function DiodeNonVdependent( p )
 
       innerD = spzerosT( vSize, twoNplusOne, 0 ) ;
       outerD = spzerosT( vSize, twoNplusOne, 0.0 ) ;
+traceit( "vSize = $vSize, twoNplusOne = $twoNplusOne" ) ;
 
       vecInnerD = spzerosT( dsz, 1, 0 ) ;
       vecOuterD = D[ :, i ] ;
@@ -51,6 +53,10 @@ function DiodeNonVdependent( p )
 
       A = dio.magnitude * outerD * Finv ;
 
+#println( "size(vecInnerD) = ", size(vecInnerD) ) ;
+#println( "size(vecOuterD) = ", size(vecOuterD) ) ;
+#println( "size(F) = ", size(F) ) ;
+#println( "size(innerD') = ", size(innerD') ) ;
       H = F * innerD.' /dio.vt ;
 
       # don't really have to cache innerD,outerD but keep for debug for now.

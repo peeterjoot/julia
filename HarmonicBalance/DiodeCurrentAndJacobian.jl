@@ -10,31 +10,39 @@ inputs:
 =#
 function DiodeCurrentAndJacobian( in, V )
 
-   S = length( in[ :nonlinearMatrices ] ) ;
+   nonlinearMatrices   = in[ :nonlinearMatrices ] ;
+   Y                   = in[ :Y ] ;
+   F                   = in[ :F ] ;
+   nonlinear           = in[ :nonlinear ] ;
+
+   S = length( nonlinearMatrices ) ;
    #traceit( "entry.  S = $S" ) ;
 
-   vSize = size( in[ :Y ], 1 ) ;
-   twoNplusOne = size( in[ :F ], 1 ) ;
+   vSize = size( Y, 1 ) ;
+   twoNplusOne = size( F, 1 ) ;
 
-   II = zeros( vSize, 1 ) ;
-   JI = zeros( vSize, vSize ) ;
+   II = zeros( Complex{Float64}, vSize, 1 ) ;
+   JI = zeros( Complex{Float64}, vSize, vSize ) ;
 
    for i in 1:S
-      H = in[ :nonlinearMatrices ][ i ].H ;
+      H = nonlinearMatrices[ i ].H ;
 
-      powerType = ( in[ :nonlinear ][ i ].type == :POWER ) ;
+      powerType = ( nonlinear[ i ].typeDesc == :POWER ) ;
       if ( powerType )
-         exponentValue = in[ :nonlinear ][ i ].exponent ;
+         exponentValue = nonlinear[ i ].exponent ;
       end
 
-      ee = zeros( twoNplusOne, 1 ) ;
-      eeprime = zeros( twoNplusOne, 1 ) ;
-      he = zeros( twoNplusOne, vSize ) ;
+      # FIXME: Both of these doesn't actually have to be zero initialized.  Could just allocate.  How?
+      ee = zeros( Complex{Float64}, twoNplusOne, 1 ) ;
+      he = zeros( Complex{Float64}, twoNplusOne, vSize ) ;
 
       for j in 1:twoNplusOne
          ht = H[ j, : ] ;
 
          x = ht * V ;
+#println( "x = ", x ) ;
+         x = x[1,1] ; 
+#println( typeof(x) ) ;
 
          # FIXME: a little confusing to have both a power type (with an exponent variable)
          # and an exponent type representing e^x.
@@ -46,15 +54,39 @@ function DiodeCurrentAndJacobian( in, V )
             gPrime = g ;
          end
 
-         ee[ j ] = g ;
+         #println( x ) ;
+         #println( typeof(x) ) ;
+         #println( typeof(ee) ) ;
+         #println( typeof(ee[j,1]) ) ;
+         #println( typeof(g) ) ;
+         ee[ j, 1 ] = g ;
+  
+         # Julia porting issue 1:
+         # 
+         # order appears to matter in Julia.  Changed [1 x N] * [1 x 1] => [1 x 1] * [1 x N].
+         # can't seem to repro this with standalone code?
+         # 
+         #println( size(he) ) ;
+         #println( typeof(j) ) ;
+         #println( j ) ;
+         #println( size(ht) ) ;
+         #println( size(ht * gPrime) ) ;
+
+         # Julia porting issue 2:
+         # 
+         # got inexact setindex error.  These showed that the issue was an attempt to assign
+         # complex-float to float array.  Fixed with complex zeros init above.
+         #println( typeof(ht * gPrime) ) ;
+         #println( typeof(he[ j, : ])  ) ;
+         # 
          he[ j, : ] = ht * gPrime ;
       end
 
-      II = II + in[ :nonlinearMatrices ][ i ].A * ee ;
-      JI = JI + in[ :nonlinearMatrices ][ i ].A * he ;
+      II = II + nonlinearMatrices[ i ].A * ee ;
+      JI = JI + nonlinearMatrices[ i ].A * he ;
    end
 
    #traceit( 'exit' ) ;
 
-   [ II, JI ] ;
+   ( II, JI ) ;
 end
