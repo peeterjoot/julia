@@ -1,10 +1,25 @@
 using Netlist ;
 using CPUTime ;
 
+#---------------------------------------
 # http://stackoverflow.com/questions/28335231/is-there-an-equivalent-to-matlabs-rcond-function-in-julia
-function myrcond( m )
-   1/cond( m ) ; 
-end
+#rcond(m) = 1/cond( m ) ; 
+#
+#---------------------------------------
+#
+# http://stackoverflow.com/a/28350401/189270
+# 
+# Matlab's rcond is an optimization based upon the fact that its an estimate of the condition number for square matrices. In my testing and given that its help mentions LAPACK's 1-norm estimator, it appears as though it uses LAPACK's dgecon.f. In fact, this is exactly what Julia does when you ask for the condition number of a square matrix with the 1- or Inf-norm.
+# 
+# So you can simply define
+# 
+# rcond(A::StridedMatrix) = 1/cond(A,1)
+# You can save Julia from twice-inverting LAPACK's results by manually combining cond(::StridedMatrix) and cond(::LU), but the savings here will almost certainly be immeasurable. Where there is a measurable savings, however, is that you can directly take the norm(A) instead of reconstructing a matrix similar to A through its LU factorization.
+ 
+rcond(A::StridedMatrix) = LAPACK.gecon!('1', lufact(A).factors, norm(A, 1))
+
+#---------------------------------------
+
 
 #=
   Uses the Harmonic Balance Method to solve the
@@ -51,7 +66,7 @@ function HBSolve( N, p )
    R = length( G ) ;
 
    # Newton's Method Parameters
-   if ( haskey( p, :linearInit ) && p[ :linearInit ] && (myrcond( Y ) > 1e-6) )
+   if ( haskey( p, :linearInit ) && p[ :linearInit ] && (rcond( Y ) > 1e-6) )
       # suggested by wikipedia HB article: use the linear solution
       # as a seed, but this doesn't work out well for some circuits ( i.e. halfWaveRectifier )
       V0 = Y\I ;
@@ -85,7 +100,7 @@ function HBSolve( N, p )
       f = Y * V - Inl - lambda * I ;
 
       J = Y - JI ;
-      jcond = myrcond( J ) ;
+      jcond = rcond( J ) ;
 
 #println( "lambda: $lambda" ) ;
       # half wave rectifier (and perhaps other circuits) can't converge when lambda == 0.  have to start off bigger.
@@ -99,7 +114,7 @@ function HBSolve( N, p )
 #            f = Y * V - Inl - dlambda * I ;
 #
 #            J = Y - JI ;
-#            jcond = myrcond( J ) ;
+#            jcond = rcond( J ) ;
 #         end
 
          while ( isnan( jcond ) )
@@ -110,7 +125,7 @@ function HBSolve( N, p )
             f = Y * V - Inl - dlambda * I ;
 
             J = Y - JI ;
-            jcond = myrcond( J ) ;
+            jcond = rcond( J ) ;
 
             if ( dlambda > 1 )
                throw( "could not find an initital source load step" ) ;
@@ -142,7 +157,7 @@ function HBSolve( N, p )
 
          # Construct Jacobian
          J = Y - JI ;
-         jcond = myrcond( J ) ;
+         jcond = rcond( J ) ;
 
          lastK = k ;
 
