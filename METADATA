@@ -1,0 +1,23 @@
+# generate this sort of template with:
+# ~/bin/mtcheck ece1229/*.jl | tee x ; # say
+
+sub juliaMeta
+{
+my @julia =
+(
+{
+   DATE => 'Feb 17, 2015',
+   path => 'ece1229/ps2p5.jl',
+   WHAT => qq(Numerical calculations for ps2 p5 (simple).)
+},
+{
+   DATE => 'Feb 22, 2015',
+   path => 'ece1229/eta.jl',
+   WHAT => qq(Numerically compute the free space impedance to compare to 120 pi.)
+},
+) ; # @julia
+
+   return @julia ;
+}
+
+1 ;
