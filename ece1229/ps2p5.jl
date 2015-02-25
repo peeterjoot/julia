@@ -1,8 +1,11 @@
 c = 3e8
 nu = 900e6
 lambda = c/nu
-r = sqrt(5000^2 + 50^2)
-a = 2 * pi * 50 * 5/( lambda * r )
+h1 = 50 
+h2 = 1.5
+d = 5000
+r = sqrt(d^2 + h1^2)
+a = 2 * pi * h1 * h2/( lambda * r )
 reflectionAdjustment = 2 * cos(a)
 G = 10^(2.55/10)
 EIRP = 30e-3 
