@@ -15,6 +15,21 @@ my @julia =
    path => 'ece1229/eta.jl',
    WHAT => qq(Numerically compute the free space impedance to compare to 120 pi.)
 },
+{
+   DATE => 'Mar 25, 2015',
+   path => 'ece1229/mycrappypolar.jl',
+   WHAT => qq(A brute force polar plot before figuring out how to do it in PyPlot directly. )
+},
+{
+   DATE => 'Mar 25, 2015',
+   path => 'ece1229/p2.jl',
+   WHAT => qq(A reimplementation of matlab/ece1229/ps4/p2.m in Julia.  Figure out how to do a polar plot)
+},
+{
+   DATE => 'Mar 25, 2015',
+   path => 'ece1229/pyplotPolarExample.jl',
+   WHAT => qq(A variation of https://github.com/gizmaa/Julia_Examples/blob/master/pyplot_windrose.jl to try a Julia implementation of ps4/p2)
+},
 ) ; # @julia
 
    return @julia ;
