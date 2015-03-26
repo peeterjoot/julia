@@ -7,27 +7,27 @@ my @julia =
 (
 {
    DATE => 'Feb 17, 2015',
-   path => 'ece1229/ps2p5.jl',
+   path => 'ece1229/ps2/ps2p5.jl',
    WHAT => qq(Numerical calculations for ps2 p5 (simple).)
 },
 {
    DATE => 'Feb 22, 2015',
-   path => 'ece1229/eta.jl',
+   path => 'ece1229/misc/eta.jl',
    WHAT => qq(Numerically compute the free space impedance to compare to 120 pi.)
 },
 {
    DATE => 'Mar 25, 2015',
-   path => 'ece1229/mycrappypolar.jl',
+   path => 'ece1229/misc/mycrappypolar.jl',
    WHAT => qq(A brute force polar plot before figuring out how to do it in PyPlot directly. )
 },
 {
    DATE => 'Mar 25, 2015',
-   path => 'ece1229/p2.jl',
-   WHAT => qq(A reimplementation of matlab/ece1229/ps4/p2.m in Julia.  Figure out how to do a polar plot)
+   path => 'ece1229/ps4/p2.jl',
+   WHAT => qq(A reimplementation of matlab/ece1229/ps4/p2.m in Julia.  Figure out how to do a polar plot and save it to a file.)
 },
 {
    DATE => 'Mar 25, 2015',
-   path => 'ece1229/pyplotPolarExample.jl',
+   path => 'ece1229/misc/pyplotPolarExample.jl',
    WHAT => qq(A variation of https://github.com/gizmaa/Julia_Examples/blob/master/pyplot_windrose.jl to try a Julia implementation of ps4/p2)
 },
 ) ; # @julia
