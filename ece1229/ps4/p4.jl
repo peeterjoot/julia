@@ -1,3 +1,5 @@
+# Pkg.add("PyPlot")
+# Pkg.add("Cubature")
 using Cubature ;
 using PyPlot ;
 

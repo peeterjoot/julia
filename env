@@ -1,13 +1,17 @@
-# C:\Users\IBM_ADMIN\AppData\Local\Julia-0.3.4\bin\julia.exe
-# C:\Users\IBM_ADMIN\AppData\Local\Julia-0.4.0-dev\bin\julia.exe
+# C:\Users\$USER\AppData\Local\Julia-0.3.4\bin\julia.exe
+# C:\Users\$USER\AppData\Local\Julia-0.4.0-dev\bin\julia.exe
 
-PATH=/cygdrive/c/Users/IBM_ADMIN/AppData/Local/Julia-0.3.4/bin:"$PATH"
-#PATH=/cygdrive/c/Users/IBM_ADMIN/AppData/Local/Julia-0.4.0-dev/bin:"$PATH"
+if [ -d /cygdrive/c/Users/$USER/AppData/Local/Julia-0.3.7 ] ; then
+   PATH=/cygdrive/c/Users/$USER/AppData/Local/Julia-0.3.7/bin:"$PATH"
+else
+   PATH=/cygdrive/c/Users/$USER/AppData/Local/Julia-0.3.4/bin:"$PATH"
+   #PATH=/cygdrive/c/Users/$USER/AppData/Local/Julia-0.4.0-dev/bin:"$PATH"
+fi
 
 # start IJulia:
 # using IJulia ; notebook()
 # requires:
 #
 # ipython:
-#C:\Users\IBM_ADMIN\Anaconda\Scripts
-#PATH=/cygdrive/c/Users/IBM_ADMIN/Anaconda/Scripts:$PATH
+#C:\Users\$USER\Anaconda\Scripts
+#PATH=/cygdrive/c/Users/$USER/Anaconda/Scripts:$PATH
