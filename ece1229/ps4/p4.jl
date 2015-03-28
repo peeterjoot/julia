@@ -39,8 +39,9 @@ function p4()
 
    (Prad, e) = hcubature( AFSquaredSinThetaX, [0, 0], [pi, 2 * pi] ) ;
    dx = 4 * pi / Prad ;
+   dxDb = 10 * log10( dx ) ;
 
-   println( "D: x-axis: $dx ($e)" ) ;
+   println( "D: x-axis: $dx, $dxDb dB ($e)" ) ;
 
    afZ(omega) = c[1] * cos( 2 * pi * cos(omega[1]) ) +
                 c[2] * cos( pi * cos(omega[1]) ) +
@@ -50,10 +51,11 @@ function p4()
    (Prad, e) = hcubature( AFSquaredSinThetaZ, [0, 0], [pi, 2 * pi] ) ;
 
    dz = 4 * pi / Prad ;
+   dzDb = 10 * log10( dz ) ;
 
-   println( "D: z-axis: $dz ($e)" ) ;
+   println( "D: z-axis: $dz, $dzDb dB ($e)" ) ;
 
-   theta = 0:0.02:pi ;
+   theta = 0:0.02:1 * pi ;
    afx = zeros( length(theta) ) ;
    afz = zeros( length(theta) ) ;
 
@@ -67,7 +69,7 @@ function p4()
 
    f1 = figure("p4Fig1",figsize=(10,10)) ; # Create a new figure
    ax1 = axes( polar="true" ) ; # Create a polar axis
-   p1 = plot( theta, afx, linestyle="-", marker="None" ) ;
+#   p1 = plot( theta, afx, linestyle="-", marker="None" ) ;
    p2 = plot( theta, afz, linestyle="-", marker="None" ) ;
 
    dtheta = 30 ;
