@@ -33,7 +33,7 @@ my @julia =
 {
    DATE => 'Mar 26, 2015',
    path => 'ece1229/ps4/p4.jl',
-   WHAT => qq(Calculation of the numeric values of the Chebychev array coeffients.)
+   WHAT => qq(Calculation of the numeric values of the Chebychev array coeffients, directivites, and plots.)
 },
 ) ; # @julia
 
