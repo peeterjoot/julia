@@ -1,13 +1,18 @@
 # Pkg.add("PyPlot")
 using PyPlot ;
 
-# Polar plot of radiation intensities for some electric z-axis oriented dipoles.
+# replot in log scale:
+# 'Polar plot of radiation intensities for some electric z-axis oriented dipoles.'
 function p2()
 
    alphas = [ 0.5, 1.0, 1.25, 2.0 ] ;
    theta = 0:0.02:1 * pi ;
-   U = zeros( length(theta), 4 ) ;
+   n = length(theta) ;
+   m = length(alphas) ;
+   U = zeros( n, m ) ;
+   V = zeros( n, m ) ;
 
+   maxU = -1 ;
    j = 1 ;
    for a = alphas
       kd = pi * a ;
@@ -15,21 +20,41 @@ function p2()
       i = 1 ;
       for t = theta
          v = (cos( kd * cos( t ) ) - cos( kd ))/sin( t ) ;
+         w = v^2 ;
+         U[i, j] = w ;
 
-         U[i, j] = v^2 ;
+         if ( w > maxU )
+            maxU = w ;
+         end
 
-         i = i + 1 ;
+         i += 1 ;
       end 
 
-      j = j + 1 ;
+      j += 1 ;
    end 
+
+   U /= maxU ;
+   for i = 1:n
+      for j = 1:m
+         v = log10( U[i, j] ) ;
+         if ( v < -50/10 )
+            v = 0 ;
+         else
+            v = v/5 + 1 ;
+         end
+
+         V[i, j] = v ;
+      end
+   end
 
    f1 = figure("p2Fig1",figsize=(10,10)) ; # Create a new figure
    ax1 = axes( polar="true" ) ; # Create a polar axis
-   pl1 = plot( theta, U[:,1], linestyle="-", marker="None" ) ;
-   pl2 = plot( theta, U[:,2], linestyle="-.", marker="None" ) ;
-   pl3 = plot( theta, U[:,3], linestyle="--", marker="None" ) ;
-   pl4 = plot( theta, U[:,4], linestyle=":", marker="None" ) ;
+
+   # linestyles: -, -., --, :
+   pl1 = plot( theta, V[:,1], linestyle="-", marker="None" ) ;
+   pl2 = plot( theta, V[:,2], linestyle="-", marker="None" ) ;
+   pl3 = plot( theta, V[:,3], linestyle="-", marker="None" ) ;
+   pl4 = plot( theta, V[:,4], linestyle="-", marker="None" ) ;
 
    dtheta = 30 ;
    ax1[:set_thetagrids]([0:dtheta:360-dtheta]) ; # Show grid lines from 0 to 360 in increments of dtheta
