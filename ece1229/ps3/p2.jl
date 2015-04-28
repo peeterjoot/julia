@@ -59,9 +59,16 @@ function p2()
    dtheta = 30 ;
    ax1[:set_thetagrids]([0:dtheta:360-dtheta]) ; # Show grid lines from 0 to 360 in increments of dtheta
    ax1[:set_theta_zero_location]("E") ; # Set 0 degrees to the top of the plot
+
+   ax1[:set_yticks]([0.2,0.4,0.6,0.8,1.0])
+   ax1[:set_yticklabels](["-40dB","-30dB","-20dB","-10dB","0dB"])
+
+   # http://www.scolvin.com/juliabyexample/
+   PyPlot.legend(alphas, loc="lower right") ;
+
    f1[:canvas][:draw]() ; # Update the figure
 
-   #savefig("p2Fig1.svg")
-#   savefig("p2Fig1.pdf")
-#   savefig("p2Fig1pn.png")
+   #savefig("ps3p2Fig1.svg")
+   savefig("ps3p2Fig1.pdf")
+   savefig("ps3p2Fig1pn.png")
 end

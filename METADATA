@@ -35,6 +35,11 @@ my @julia =
    path => 'ece1229/ps4/p4.jl',
    WHAT => qq(Calculation of the numeric values of the Chebyshev array coeffients, directivites, and plots.)
 },
+{
+   DATE => 'Apr 28, 2015',
+   path => 'ece1229/ps3/p2.jl',
+   WHAT => qq(Log polar plot of finite length dipole power, to zoom in on the side lobes for the 1.25 case.)
+},
 ) ; # @julia
 
    return @julia ;
