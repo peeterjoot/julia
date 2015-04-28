@@ -1,11 +1,18 @@
 # C:\Users\$USER\AppData\Local\Julia-0.3.4\bin\julia.exe
 # C:\Users\$USER\AppData\Local\Julia-0.4.0-dev\bin\julia.exe
 
-if [ -d /cygdrive/c/Users/$USER/AppData/Local/Julia-0.3.7 ] ; then
-   PATH=/cygdrive/c/Users/$USER/AppData/Local/Julia-0.3.7/bin:"$PATH"
+# looks like this could be constructed from $HOMEPATH instead:
+if [ -d /cygdrive/c/Users/IBM_ADMIN ] ; then
+   u=/cygdrive/c/Users/IBM_ADMIN
 else
-   PATH=/cygdrive/c/Users/$USER/AppData/Local/Julia-0.3.4/bin:"$PATH"
-   #PATH=/cygdrive/c/Users/$USER/AppData/Local/Julia-0.4.0-dev/bin:"$PATH"
+   u=/cygdrive/c/Users/$USER
+fi
+
+if [ -d $u/AppData/Local/Julia-0.3.7 ] ; then
+   PATH=$u/AppData/Local/Julia-0.3.7/bin:"$PATH"
+else
+   PATH=$u/AppData/Local/Julia-0.3.4/bin:"$PATH"
+   #PATH=$u/AppData/Local/Julia-0.4.0-dev/bin:"$PATH"
 fi
 
 # start IJulia:
@@ -14,4 +21,4 @@ fi
 #
 # ipython:
 #C:\Users\$USER\Anaconda\Scripts
-#PATH=/cygdrive/c/Users/$USER/Anaconda/Scripts:$PATH
+#PATH=$u/Anaconda/Scripts:$PATH
