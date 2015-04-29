@@ -84,5 +84,5 @@ function p3( logThresh )
 
    #savefig("ps3p3$(figDesc)Fig1.svg")
    savefig("ps3p3$(figDesc)Fig1.pdf")
-   savefig("ps3p3$(figDesc)Fig1pn.png")
+   #savefig("ps3p3$(figDesc)Fig1pn.png")
 end
