@@ -84,6 +84,11 @@ function p4()
    savefig("p4Fig1pn.png")
 end
 
+# vectorization based on how sinc() is implemented in share/julia/base/special/trig.jl
+#
+fourElementUniformArray(x::Number) = x==0 ? one(x) : oftype(x,sin(2.5 * x)/(2.5 * x))
+@vectorize_1arg Number fourElementUniformArray
+
 function p4x( logthresh )
 
    c = computeCoefficients() ;
@@ -97,7 +102,7 @@ function p4x( logthresh )
          c[2] * cos( st ) +
          c[3]).^2 ; 
 
-   uf = sinc( 2.5 * st ).^2 ;
+   uf = (fourElementUniformArray( st )).^2 ;
 
    U = Array( Float64, length(theta), 2 ) ;
    U[:,1] = af ;
