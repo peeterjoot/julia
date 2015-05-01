@@ -50,6 +50,16 @@ my @julia =
    path => 'ece1229/ps4/p2x.jl',
    WHAT => qq(Replot ps4 p2 function in linear and log scales, based on code from ps3/p3.jl)
 },
+{
+   DATE => 'May 1, 2015',
+   path => 'ece1229/ps4/p3.jl',
+   WHAT => qq(Call polarPlot() to generate plot in both linear and log scales)
+},
+{
+   DATE => 'May 1, 2015',
+   path => 'ece1229/ps4/polarPlot.jl',
+   WHAT => qq(Turn p2x.jl into a generic polar plotting function.)
+},
 ) ; # @julia
 
    return @julia ;
