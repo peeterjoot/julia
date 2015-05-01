@@ -89,6 +89,7 @@ end
 fourElementUniformArray(x::Number) = x==0 ? one(x) : oftype(x,sin(2.5 * x)/(2.5 * x))
 @vectorize_1arg Number fourElementUniformArray
 
+# redo the power plots that were originally done in Mathematica
 function p4x( logthresh )
 
    c = computeCoefficients() ;
@@ -108,5 +109,5 @@ function p4x( logthresh )
    U[:,1] = af ;
    U[:,2] = uf ;
 
-   polarPlot( theta, U, "testmult"; logThreshDB = logthresh, normalize = true )
+   polarPlot( theta, U, "testmult"; logThreshDB = logthresh, normalize = true, legends = [ "\$T_4(x_0 \\cos(u/2))\$", "\$\\sum_{n=0}^4 e^{j n u}\$" ] )
 end
