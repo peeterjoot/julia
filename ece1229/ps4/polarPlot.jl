@@ -1,30 +1,48 @@
 # Pkg.add("PyPlot")
 using PyPlot ;
 
-# logThreshDB: 0, or negative multiple of -10 (or -5 if >= -25).
+#
+# logThreshDB: one of:
+#  0
+#  negative multiple of -10 (when <= -30)
+#  negative multiple of -5 (when >= -25).
+#
 # normalize = true: don't assume the function is normalized to unity.
+#
 # savename: a string for the plot save name.
-
-function polarPlot(theta, U, savename, logThreshDB = 0, normalize = false)
+#
+# X: array(length(theta), n)
+#
+# legends: of size(X,2) != 1, this should be an array of that size, with a legend value for each plot.
+#
+function polarPlot( theta, X, savename ; logThreshDB = 0, normalize = false, saveExt = "pdf", legends = [] )
 
    if ( normalize )
-      maxU = maximum( U ) ;
-      U /= maxU ;
+      maxU = maximum( X ) ;
+      X /= maxU ;
    end
 
-   f1 = figure( "p2Fig1", figsize=(10,10) ) ; # Create a new figure
+   f1 = figure( "fig", figsize=(10,10) ) ; # Create a new figure
    ax1 = axes( polar="true" ) ; # Create a polar axis
 
+   n = size( X, 2 ) ;
+
    if ( logThreshDB == 0 )
-      V = U ;
+      V = X ;
    else
       # convert to dB scale:
       #println( "$logThreshDB" ) ;
-      V = clamp( 10 * log10( U ), logThreshDB, 0 )/(-logThreshDB) + 1 ;
+      V = Array( Float64, size(X) ) ;
+
+      for i = 1:n
+         V[:,i] = clamp( 10 * log10( X[:,i] ), logThreshDB, 0 )/(-logThreshDB) + 1 ;
+      end
    end
 
-   # linestyles: -, -., --, :
-   plot( theta, V, linestyle="-", marker="None" ) ;
+   for i = 1:n
+      # linestyles: -, -., --, :
+      plot( theta, V[:,i], linestyle="-", marker="None" ) ;
+   end
 
    dtheta = 30 ;
    ax1[:set_thetagrids]([0:dtheta:360-dtheta]) ; # Show grid lines from 0 to 360 in increments of dtheta
@@ -58,8 +76,10 @@ function polarPlot(theta, U, savename, logThreshDB = 0, normalize = false)
       ax1[:set_yticklabels]( yticks ) ;
    end
 
-   # http://www.scolvin.com/juliabyexample/
-   #PyPlot.legend( alphas, loc="lower right" ) ;
+   if ( length(legends) != 0 )
+      # http://www.scolvin.com/juliabyexample/
+      PyPlot.legend( legends, loc="lower right" ) ;
+   end
 
    f1[:canvas][:draw]() ; # Update the figure
 
@@ -69,7 +89,5 @@ function polarPlot(theta, U, savename, logThreshDB = 0, normalize = false)
       figDesc = "Linear" ;
    end
 
-   #savefig("ps4p2$(figDesc)Fig1.svg")
-   savefig("ps4p2$(figDesc)Fig1.pdf")
-   #savefig("ps4p2$(figDesc)Fig1pn.png")
+   savefig("$(savename)$(figDesc)Fig1.$saveExt")
 end

@@ -8,15 +8,15 @@ else
    u=/cygdrive/c/Users/$USER
 fi
 
-if [ -d $u/AppData/Local/Julia-0.4.0-dev ] ; then
-   PATH=$u/AppData/Local/Julia-0.4.0-dev/bin:"$PATH"
-else
+#if [ -d $u/AppData/Local/Julia-0.4.0-dev ] ; then
+#   PATH=$u/AppData/Local/Julia-0.4.0-dev/bin:"$PATH"
+#else
    if [ -d $u/AppData/Local/Julia-0.3.7 ] ; then
       PATH=$u/AppData/Local/Julia-0.3.7/bin:"$PATH"
    else
       PATH=$u/AppData/Local/Julia-0.3.4/bin:"$PATH"
    fi
-fi
+#fi
 
 # start IJulia:
 # using IJulia ; notebook()

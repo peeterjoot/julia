@@ -4,7 +4,9 @@ function p3( logthresh )
 
    u = 5 * pi * cos( theta ) / 8 ;
    #U = cos( u ).^4 ;
+
+   # plot power:
    U = cos( u ).^8 ;
 
-   polarPlot( theta, U, "ps4p3", logthresh ) ;
+   polarPlot( theta, U, "ps4p3" ; logThreshDB = logthresh ) ;
 end

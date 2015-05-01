@@ -83,3 +83,25 @@ function p4()
    savefig("p4Fig1.pdf")
    savefig("p4Fig1pn.png")
 end
+
+function p4x( logthresh )
+
+   c = computeCoefficients() ;
+   I = [ c[1]/2, c[2]/2, c[3], c[2]/2, c[1]/2 ]
+
+   # omega[1] = theta, omega[2] = phi
+   theta = linrange( 0, 1 * pi, 500 ) ;
+   st = pi * sin(theta) * cos( 0 ) ;
+
+   af = (c[1] * cos( 2 * st ) +
+         c[2] * cos( st ) +
+         c[3]).^2 ; 
+
+   uf = sinc( 2.5 * st ).^2 ;
+
+   U = Array( Float64, length(theta), 2 ) ;
+   U[:,1] = af ;
+   U[:,2] = uf ;
+
+   polarPlot( theta, U, "testmult"; logThreshDB = logthresh, normalize = true )
+end
