@@ -45,6 +45,11 @@ my @julia =
    path => 'ece1229/ps3/p3.jl',
    WHAT => qq(Replot corner cube array factor in log scale.  Original polar and 3D plots were done in the ps3Q3plotsCorrected.nb Mathematica notebook.)
 },
+{
+   DATE => 'Apr 30, 2015',
+   path => 'ece1229/ps4/p2x.jl',
+   WHAT => qq(Replot ps4 p2 function in linear and log scales, based on code from ps3/p3.jl)
+},
 ) ; # @julia
 
    return @julia ;
