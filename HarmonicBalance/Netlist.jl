@@ -72,6 +72,16 @@ module Netlist
       numberOfNonlinearGains
    end
 
+   # 
+   # http://stackoverflow.com/questions/32273230/how-to-convert-integer-regex-captures-to-array-of-integers-in-julia-0-4
+   #
+   # Julia 0.3 int(c[3:4]) syntax used to work.  In Julia 0.4 extra processing
+   # is required to convert arrays of substrings to an int array:
+   # 
+   function captureToInt(c)
+       map(x -> parse(Int, x), c)
+   end
+
    #=
      NETLIST SYNTAX:
    
@@ -296,12 +306,12 @@ module Netlist
 
             c = m.captures ;
 
-            nodes = int(c[3:4]) ;
+            nodes = captureToInt(c[3:4]) ;
             push!( allNodes, nodes... ) ;
 
             typePrefix = c[1] ;
 
-            i = RCL_Line_T( char(typePrefix[1]), c[2], nodes..., float(c[5]) ) ;
+            i = RCL_Line_T( Char(typePrefix[1]), c[2], nodes..., float(c[5]) ) ;
 
             if ( i.typePrefix == 'R' )
                push!( linesInfo.resistor, i ) ;
@@ -320,12 +330,12 @@ module Netlist
 
             c = m.captures ;
 
-            nodes = int(c[3:4]) ;
+            nodes = captureToInt(c[3:4]) ;
             push!( allNodes, nodes... ) ;
 
             typePrefix = c[1] ;
 
-            i = SourceLine_T( char(typePrefix[1]), c[2], nodes..., false, float(c[5]), 0.0, 0.0 ) ;
+            i = SourceLine_T( Char(typePrefix[1]), c[2], nodes..., false, float(c[5]), 0.0, 0.0 ) ;
 
             if ( i.typePrefix == 'V' )
                push!( linesInfo.voltage, i ) ;
@@ -351,7 +361,7 @@ module Netlist
                phase = float( phase ) ;
             end
 
-            nodes = int(c[3:4]) ;
+            nodes = captureToInt(c[3:4]) ;
             push!( allNodes, nodes... ) ;
 
             typePrefix = c[1] ;
@@ -359,7 +369,7 @@ module Netlist
             value = float(c[5]) ;
             omega = 2 * pi * float(c[6]) ;
 
-            i = SourceLine_T( char(typePrefix[1]), c[2], nodes..., true, float(c[5]), omega, phase ) ;
+            i = SourceLine_T( Char(typePrefix[1]), c[2], nodes..., true, float(c[5]), omega, phase ) ;
 
             if ( i.typePrefix == 'V' )
                push!( linesInfo.voltage, i ) ;
@@ -378,12 +388,12 @@ module Netlist
 
             c = m.captures ;
 
-            nodes = int(c[3:4]) ;
+            nodes = captureToInt(c[3:4]) ;
             push!( allNodes, nodes... ) ;
 
             typePrefix = c[1] ;
 
-            i = DiodeLine_T( char(typePrefix[1]), c[2], nodes..., float(c[5]), float(c[6]) ) ;
+            i = DiodeLine_T( Char(typePrefix[1]), c[2], nodes..., float(c[5]), float(c[6]) ) ;
 
             push!( linesInfo.diode, i ) ;
 
@@ -398,12 +408,12 @@ module Netlist
 
             c = m.captures ;
 
-            nodes = int(c[3:4]) ;
+            nodes = captureToInt(c[3:4]) ;
             push!( allNodes, nodes... ) ;
 
             typePrefix = c[1] ;
 
-            i = PowerLine_T( char(typePrefix[1]), c[2], nodes..., float(c[5]), float(c[6]), float(c[7]) ) ;
+            i = PowerLine_T( Char(typePrefix[1]), c[2], nodes..., float(c[5]), float(c[6]), float(c[7]) ) ;
 
             push!( linesInfo.power, i ) ;
 
@@ -431,12 +441,12 @@ module Netlist
                numberOfNonlinearGains = numberOfNonlinearGains + 1 ;
             end
 
-            nodes = int(c[3:6]) ;
+            nodes = captureToInt(c[3:6]) ;
             push!( allNodes, nodes... ) ;
 
             typePrefix = c[1] ;
 
-            i = VSourceLine_T( char(typePrefix[1]), c[2], nodes..., float(c[7]), vt, exponent ) ;
+            i = VSourceLine_T( Char(typePrefix[1]), c[2], nodes..., float(c[7]), vt, exponent ) ;
 
             push!( linesInfo.amplifier, i ) ;
 

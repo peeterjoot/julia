@@ -1,5 +1,5 @@
 p = Dict{Symbol,Any}() ;
-p[ :fileName ] = "../circuits/simpleSingleNodeRectifier.netlist" ;
+p[ :fileName ] = "../../matlab/ece1254/circuits/simpleSingleNodeRectifier.netlist" ;
 p[ :figName ] = "simpleRectifierCircuit" ;
 p[ :figNum ] = 3 ;
 p[ :logPlot ] = true ;
@@ -21,7 +21,7 @@ HBSolve( 50, p ) ;
 #
 #   if ( doAll || false )
 #      p = Dict{Symbol,Any}() ;
-#      p[ :fileName ] = "../circuits/BridgeRectifier.netlist" ;
+#      p[ :fileName ] = "../../matlab/ece1254/circuits/BridgeRectifier.netlist" ;
 #      p[ :figName ] = "bridgeRectifier" ;
 #
 #      p[ :figNum ] = 5 ;
@@ -69,7 +69,7 @@ HBSolve( 50, p ) ;
 #
 #   if ( doAll || false )
 #      p = Dict{Symbol,Any}() ;
-#      p[ :fileName ] = "../circuits/BridgeRectifierPow.netlist" ;
+#      p[ :fileName ] = "../../matlab/ece1254/circuits/BridgeRectifierPow.netlist" ;
 #      p[ :figName ] = "bridgeRectifierPow" ;
 #      p[ :xLabel ] = "Time (s)" ;
 #      #p[ :allowCaching ] = false ;
@@ -91,7 +91,7 @@ HBSolve( 50, p ) ;
 #
 #   if ( doAll || false )
 #      p = Dict{Symbol,Any}() ;
-#      p[ :fileName ] = "../circuits/BridgeRectifierCap.netlist" ;
+#      p[ :fileName ] = "../../matlab/ece1254/circuits/BridgeRectifierCap.netlist" ;
 #      p[ :figName ] = "bridgeRectifierCapFilter" ;
 #      p[ :xLabel ] = "Time (s)" ;
 #
@@ -182,7 +182,7 @@ HBSolve( 50, p ) ;
 #
 #   if ( doAll || false )
 #      p = Dict{Symbol,Any}() ;
-#      p[ :fileName ] = "../circuits/simpleSingleNodeRectifier.netlist" ;
+#      p[ :fileName ] = "../../matlab/ece1254/circuits/simpleSingleNodeRectifier.netlist" ;
 #      p[ :figName ] = "simpleRectifierCircuit" ;
 #      p[ :figNum ] = 3 ;
 #      p[ :logPlot ] = true ;
@@ -206,7 +206,7 @@ HBSolve( 50, p ) ;
 #
 #   if ( doAll3 || false )
 #      p = Dict{Symbol,Any}() ;
-#      p[ :fileName ] = "../circuits/halfWaveRectifier.netlist" ;
+#      p[ :fileName ] = "../../matlab/ece1254/circuits/halfWaveRectifier.netlist" ;
 #      p[ :figName ] = "halfWaveRectifier" ;
 #      p[ :figNum ] = 2 ;
 #      #p[ :N ] = 1 ;
@@ -236,7 +236,7 @@ HBSolve( 50, p ) ;
 #
 #   if ( doAll2 || false )
 #      p = Dict{Symbol,Any}() ;
-#      p[ :fileName ] = "../circuits/halfWaveRectifierPow.netlist" ;
+#      p[ :fileName ] = "../../matlab/ece1254/circuits/halfWaveRectifierPow.netlist" ;
 #      p[ :figName ] = "halfWaveRectifierPow" ;
 #      p[ :figNum ] = 2 ;
 #
@@ -265,7 +265,7 @@ HBSolve( 50, p ) ;
 #      #    "V_2"
 #      #    "i1_0,1"
 #      p = Dict{Symbol,Any}() ;
-#      p[ :fileName ] = "../circuits/simpleVrect.netlist" ;
+#      p[ :fileName ] = "../../matlab/ece1254/circuits/simpleVrect.netlist" ;
 #      p[ :figName ] = "typicalRectifierCircuit" ;
 #      p[ :figNum ] = 3 ;
 #      p[ :logPlot ] = true ;
@@ -299,7 +299,7 @@ HBSolve( 50, p ) ;
 #
 #   if ( doAll3 || false )
 #      p = Dict{Symbol,Any}() ;
-#      p[ :fileName ] = "../circuits/simpleVrectSmallerCap.netlist" ;
+#      p[ :fileName ] = "../../matlab/ece1254/circuits/simpleVrectSmallerCap.netlist" ;
 #      p[ :figName ] = "typicalRectifierCircuitSmallerCap" ;
 #
 #      p[ :xLabel ] = "Time (s)" ;
@@ -329,7 +329,7 @@ HBSolve( 50, p ) ;
 #      hold on ;
 #
 #      p = Dict{Symbol,Any}() ;
-#      p[ :fileName ] = "../circuits/halfWaveRectifier.netlist" ;
+#      p[ :fileName ] = "../../matlab/ece1254/circuits/halfWaveRectifier.netlist" ;
 #      p[ :figName ] = "halfWaveRectifier" ;
 #      p[ :nofigure ] = true ;
 #      p[ :nPlus ] = [ 1 2 ] ;
@@ -337,7 +337,7 @@ HBSolve( 50, p ) ;
 #      PlotWaveforms( p ) ;
 #
 #      p = Dict{Symbol,Any}() ;
-#      p[ :fileName ] = "../circuits/simpleVrectSmallerCap.netlist" ;
+#      p[ :fileName ] = "../../matlab/ece1254/circuits/simpleVrectSmallerCap.netlist" ;
 #      p[ :figName ] = "typicalRectifierCircuitSmallerCap" ;
 #      p[ :nofigure ] = true ;
 #      p[ :nPlus ] = 2 ;
@@ -345,7 +345,7 @@ HBSolve( 50, p ) ;
 #      PlotWaveforms( p ) ;
 #
 #      p = Dict{Symbol,Any}() ;
-#      p[ :fileName ] = "../circuits/simpleVrect.netlist" ;
+#      p[ :fileName ] = "../../matlab/ece1254/circuits/simpleVrect.netlist" ;
 #      p[ :figName ] = "typicalRectifier" ;
 #      p[ :nofigure ] = true ;
 #      p[ :nPlus ] = [ 2 ] ;
@@ -370,7 +370,7 @@ HBSolve( 50, p ) ;
 #
 #      # C = 0
 #      p = Dict{Symbol,Any}() ;
-#      p[ :fileName ] = "../circuits/halfWaveRectifierMultiSource.netlist" ;
+#      p[ :fileName ] = "../../matlab/ece1254/circuits/halfWaveRectifierMultiSource.netlist" ;
 #      p[ :figName ] = "halfWaveRectifierMultiSource" ;
 #      p[ :nofigure ] = true ;
 #      p[ :nPlus ] = [ 1 2 ] ;
@@ -379,7 +379,7 @@ HBSolve( 50, p ) ;
 #
 #      # C = 1nF (1e-9)
 #      p = Dict{Symbol,Any}() ;
-#      p[ :fileName ] = "../circuits/simpleVrectSmallerCapMultiSource.netlist" ;
+#      p[ :fileName ] = "../../matlab/ece1254/circuits/simpleVrectSmallerCapMultiSource.netlist" ;
 #      p[ :figName ] = "typicalRectifierCircuitSmallerCapMultiSource" ;
 #      p[ :nofigure ] = true ;
 #      p[ :nPlus ] = 2 ;
@@ -388,7 +388,7 @@ HBSolve( 50, p ) ;
 #
 #      # C = 1e-9
 #      p = Dict{Symbol,Any}() ;
-#      p[ :fileName ] = "../circuits/simpleVrectMediumCapMultiSource.netlist" ;
+#      p[ :fileName ] = "../../matlab/ece1254/circuits/simpleVrectMediumCapMultiSource.netlist" ;
 #      p[ :figName ] = "typicalRectifierCircuitMediumCapMultiSource" ;
 #      p[ :nofigure ] = true ;
 #      p[ :nPlus ] = 2 ;
@@ -397,7 +397,7 @@ HBSolve( 50, p ) ;
 #
 #      # C = 1e-6
 #      p = Dict{Symbol,Any}() ;
-#      p[ :fileName ] = "../circuits/simpleVrectMultiSource.netlist" ;
+#      p[ :fileName ] = "../../matlab/ece1254/circuits/simpleVrectMultiSource.netlist" ;
 #      p[ :figName ] = "typicalRectifierMultiSource" ;
 #      p[ :nofigure ] = true ;
 #      p[ :nPlus ] = [ 2 ] ;
@@ -418,7 +418,7 @@ HBSolve( 50, p ) ;
 #
 #   if ( doAll2 || false )
 #      p = Dict{Symbol,Any}() ;
-#      p[ :fileName ] = "../circuits/LCLowpass.netlist" ;
+#      p[ :fileName ] = "../../matlab/ece1254/circuits/LCLowpass.netlist" ;
 #      p[ :figName ] = "lowPassFilter" ;
 ##      p[ :verbose ] = true ;
 #
@@ -469,7 +469,7 @@ HBSolve( 50, p ) ;
 #
 #   if ( doAll || false )
 #      p = Dict{Symbol,Any}() ;
-#      p[ :fileName ] = "../circuits/square.netlist" ;
+#      p[ :fileName ] = "../../matlab/ece1254/circuits/square.netlist" ;
 #      p[ :figName ] = "PowerLawAmplifiers" ;
 #
 #      #p[ :allowCaching ] = false ;
@@ -487,7 +487,7 @@ HBSolve( 50, p ) ;
 #   # basic visual test of source voltage addition.
 #   if ( 0 )
 #      p = Dict{Symbol,Any}() ;
-#      p[ :fileName ] = "../circuits/x.netlist" ;
+#      p[ :fileName ] = "../../matlab/ece1254/circuits/x.netlist" ;
 #      p[ :figName ] = "x" ;
 #      p[ :xLabel ] = "Time (s)" ;
 #

@@ -4,9 +4,8 @@ How to run this:
 
    workspace()
 
-   push!(LOAD_PATH, pwd()) # julia 0.4:
-
-   using HB ; include("makefigures.jl")
+   # LOAD_PATH FOR julia 0.4:
+   push!(LOAD_PATH, pwd()) ; using HB ; include("makefigures.jl")
 
 ... hit errors that I thought might be due to rcond() "implementation" (myrcond).  but testing with:
 

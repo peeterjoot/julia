@@ -19,7 +19,7 @@ end
 function negativeAndPositiveFrequencies( freq )
    fr = abs( freq ) ;
 
-   firstNonZeroIndex = int( fr[1] < 1 ) + 1 ;
+   firstNonZeroIndex = Int( fr[1] < 1 ) + 1 ;
    frPlus = fr[ firstNonZeroIndex:end ] ;
 
 # From http://stackoverflow.com/a/27884583/189270
