@@ -206,7 +206,8 @@ function HBSolve( N, p )
       end
 
       if ( dlambda <= p[ :minStep ] )
-         throw( "source load step $dlambda too small (> ", p[ :minStep ], "), function not converging" ) ;
+         ms = p[ :minStep ] ;
+         throw( "source load step $dlambda too small (> $ms), function not converging" ) ;
       end
    end
 
