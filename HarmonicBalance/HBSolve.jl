@@ -33,15 +33,15 @@ rcond(A::StridedMatrix) = LAPACK.gecon!('1', lufact(A).factors, norm(A, 1))
 =#
 function HBSolve( N, p )
    # Dict of Symbol,Any: (could replace Any with Union(Int,Bool,Float64))
-   defp = [ :tolF =>             1e-6,
-            :edV =>              1e-3,
-            :JcondTol =>         1e-23,
-            :iterations =>       50,
-            :subiterations =>    50,
-            :minStep =>          0.0001,
-            :dlambda =>          0.01,
-            :dispfrequency =>    1,
-            :maxStepMultiples => 50 ] ;
+   defp = Dict( :tolF =>             1e-6,
+                :edV =>              1e-3,
+                :JcondTol =>         1e-23,
+                :iterations =>       50,
+                :subiterations =>    50,
+                :minStep =>          0.0001,
+                :dlambda =>          0.01,
+                :dispfrequency =>    1,
+                :maxStepMultiples => 50 ) ;
 
    for k in keys( defp )
       if ( !haskey( p, k ) )
@@ -61,7 +61,8 @@ function HBSolve( N, p )
 
    G = r[ :G ] ;
    Y = r[ :Y ] ;
-   I = r[ :I ] ;
+   # I -> II.  Lint: WARN   "I" as a local variable might cause confusion with a synonymous export from Base
+   II = r[ :I ] ;
    F = r[ :F ] ;
    R = length( G ) ;
 
@@ -69,7 +70,7 @@ function HBSolve( N, p )
    if ( haskey( p, :linearInit ) && p[ :linearInit ] && (rcond( Y ) > 1e-6) )
       # suggested by wikipedia HB article: use the linear solution
       # as a seed, but this doesn't work out well for some circuits ( i.e. halfWaveRectifier )
-      V0 = Y\I ;
+      V0 = Y\II ;
    elseif ( haskey( p, :complexRandInit ) && p[ :complexRandInit ] )
       V0 = rand( Complex{Float64}, R * ( 2 * N + 1 ), 1 ) ;
    elseif ( haskey( p, :randInit ) && p[ :randInit ] )
@@ -97,7 +98,7 @@ function HBSolve( N, p )
       (Inl, JI) = DiodeCurrentAndJacobian( r, V ) ;
 
       # Function to minimize:
-      f = Y * V - Inl - lambda * I ;
+      f = Y * V - Inl - lambda * II ;
 
       J = Y - JI ;
       jcond = rcond( J ) ;
@@ -111,7 +112,7 @@ function HBSolve( N, p )
 #         if ( isnan( jcond ) )
 #            V0 = zeros( R * ( 2 * N + 1 ), 1 ) ;
 #            V = V0 ;
-#            f = Y * V - Inl - dlambda * I ;
+#            f = Y * V - Inl - dlambda * II ;
 #
 #            J = Y - JI ;
 #            jcond = rcond( J ) ;
@@ -122,7 +123,7 @@ function HBSolve( N, p )
 
             dlambda = dlambda + p[ :dlambda ] ;
 
-            f = Y * V - Inl - dlambda * I ;
+            f = Y * V - Inl - dlambda * II ;
 
             J = Y - JI ;
             jcond = rcond( J ) ;
@@ -153,7 +154,7 @@ function HBSolve( N, p )
          (Inl, JI) = DiodeCurrentAndJacobian( r, V ) ;
 
          # Function to minimize:
-         f = Y * V - Inl - lambda * I ;
+         f = Y * V - Inl - lambda * II ;
 
          # Construct Jacobian
          J = Y - JI ;

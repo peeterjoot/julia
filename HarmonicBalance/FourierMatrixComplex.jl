@@ -42,6 +42,6 @@ function FourierMatrixComplex( N )
    #
    # (would this also work in Matlab?)
 
-   scale = im * 2 * pi / twoNplusOne ;
-   exp( scale * ((-N:N) .* (-N:N)') ) ;
+   freqscale = im * 2 * pi / twoNplusOne ;
+   exp( freqscale * ((-N:N) .* (-N:N)') ) ;
 end

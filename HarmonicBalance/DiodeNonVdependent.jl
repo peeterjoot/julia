@@ -1,8 +1,11 @@
 using SparseUtil ;
 
 type NonlinearMatrices_T
-   innerD
-   outerD
+   # these two only take +-1 values.  Since the matrices are sparse, 
+   # perhaps the extra storage required doesn't matter much
+
+   innerD::SparseMatrixCSC{Int64,Int64}
+   outerD::SparseMatrixCSC{Int64,Int64}
    H
    A
 end

@@ -123,7 +123,7 @@ function HarmonicBalance( inputs, N, omega )
 
    Y = zeros( Complex{Float64}, twoNplusOne * R, twoNplusOne * R ) ;
    Vnames = Array( String, twoNplusOne * R, 1 ) ;
-   I = zeros( Complex{Float64}, twoNplusOne * R, 1 ) ;
+   II = zeros( Complex{Float64}, twoNplusOne * R, 1 ) ;
 
    jOmega = im * omega ;
 
@@ -149,7 +149,7 @@ function HarmonicBalance( inputs, N, omega )
       if ( length(omegaIndex) != 0 )
          # found one:
 
-         I[ q+1:q+R ] = B[ :, omegaIndex ] ;
+         II[ q+1:q+R ] = B[ :, omegaIndex ] ;
       else
          # Not an error to not find a matching frequency.  Our input sources may not have all the frequencies that
          # we allow in our bandwidth limited Harmonic Balance DFT representation.
@@ -160,7 +160,7 @@ function HarmonicBalance( inputs, N, omega )
    end
 
    results[ :Y ] = Y ;
-   results[ :I ] = I ;
+   results[ :I ] = II ;
    results[ :Vnames ] = Vnames ;
 
    #-----------------

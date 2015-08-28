@@ -2,9 +2,11 @@
 
 How to run this:
 
-workspace() ; using HB ; include("makefigures.jl")
+   workspace()
 
-julia> workspace() ; using HB ; include("makefigures.jl")
+   push!(LOAD_PATH, pwd()) # julia 0.4:
+
+   using HB ; include("makefigures.jl")
 
 ... hit errors that I thought might be due to rcond() "implementation" (myrcond).  but testing with:
 
@@ -16,6 +18,13 @@ Wonder if this is
 
 - types (initializing as zeros, not complex zeros)?
 - scoping?
+
+-------------------------------------------------------------------
+
+Lint with (0.3)
+
+using Lint
+lintfile("HB.jl")
 
 -------------------------------------------------------------------
 Infrastructure:

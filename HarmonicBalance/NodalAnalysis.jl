@@ -403,7 +403,7 @@ function NodalAnalysis( filename )
       end
    end
 
-   [
+   Dict(
       :G                 => G,
       :C                 => C,
       :B                 => B,
@@ -411,5 +411,5 @@ function NodalAnalysis( filename )
       :D                 => D,
       :xnames            => xnames,
       :nonlinear         => nonlinear
-   ] ;
+   ) ;
 end
