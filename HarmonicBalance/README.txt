@@ -1,5 +1,14 @@
 -------------------------------------------------------------------
 
+Status: 
+
+Testing HB code, finding non-convergence.
+
+Stepped back and tried constant linear system (1254: ps1).  See ps1a.jl for 
+current results (not working).
+
+-------------------------------------------------------------------
+
 How to run this:
 
    workspace()

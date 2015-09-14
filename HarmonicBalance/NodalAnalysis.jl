@@ -30,7 +30,15 @@ function negativeAndPositiveFrequencies( freq )
 #   frPlus = filter( x -> x > 0, fr ) ;
 #   frPlus = fr[ fr. > 0 ] ;
 
-   push!( fr, -frPlus... ) ;
+   # Calling push! with zero length array seems to cause deprecated warning in julia 0.4
+   # Trying that manually in the REPL in julia 0.3 causes error?
+   #
+   # Looks like it's best to avoid that unconditionally:
+   #
+   if ( length(frPlus) != 0 )
+      #println("fr: $fr ; frPlus: $frPlus") ;
+      push!( fr, -frPlus... ) ;
+   end
 
    sort( fr ) ; # return
 end
