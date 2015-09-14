@@ -275,7 +275,7 @@ function NodalAnalysis( filename )
          G[ plusNodeNum, r ] = 1 ;
       end
 
-println("expValue: $alpha, plusControlNodeNum: $plusControlNodeNum, minusControlNodeNum: $minusControlNodeNum");
+#println("expValue: $alpha, plusControlNodeNum: $plusControlNodeNum, minusControlNodeNum: $minusControlNodeNum");
       if ( 1.0 == alpha )
          if ( plusControlNodeNum != 0 )
             G[ r, plusControlNodeNum ] = gain/vt ;
@@ -296,8 +296,8 @@ println("expValue: $alpha, plusControlNodeNum: $plusControlNodeNum, minusControl
       xnames[r] = "i_{E$(lt)_{$plusNodeNum,$minusNodeNum}}" ;
    end
 
-m = max(abs(G)...) ;
-println("$m") ;
+#m = max(abs(G)...) ;
+#println("$m") ;
    # value for r (fall through from loop above)
    # process the inductors:
    for ind in li.inductor
