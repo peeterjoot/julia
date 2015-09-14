@@ -33,7 +33,7 @@ module Netlist
       nc2::Int
       gain::Float64
       vt::Float64
-      exponent::Float64
+      expValue::Float64
    end
 
    type DiodeLine_T
@@ -52,7 +52,7 @@ module Netlist
       node2::Int
       io::Float64
       vt::Float64
-      exponent::Float64
+      expValue::Float64
    end
 
    type NetlistLines_T
@@ -429,14 +429,14 @@ module Netlist
             optNonlinear = c[8] ;
 
             if ( optNonlinear == "" )
-               vt = 0.0 ;
-               exponent = 1.0 ;
+               vt = 1.0 ;
+               expValue = 1.0 ;
             else
                # depend on throw here for error checking (like the type conversions do)
                m = match( re_two, optNonlinear ) ;
 
                vt = float( m.captures[1] ) ; 
-               exponent = float( m.captures[2] ) ; 
+               expValue = float( m.captures[2] ) ; 
 
                numberOfNonlinearGains = numberOfNonlinearGains + 1 ;
             end
@@ -446,8 +446,7 @@ module Netlist
 
             typePrefix = c[1] ;
 
-            i = VSourceLine_T( Char(typePrefix[1]), c[2], nodes..., float(c[7]), vt, exponent ) ;
-
+            i = VSourceLine_T( Char(typePrefix[1]), c[2], nodes..., float(c[7]), vt, expValue ) ;
             push!( linesInfo.amplifier, i ) ;
 
             continue ;

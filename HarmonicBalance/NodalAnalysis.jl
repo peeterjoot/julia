@@ -10,7 +10,7 @@ type NonlinearElement_T
    vn::Int
    vt::Float64
    magnitude::Float64
-   exponent::Float64
+   expValue::Float64
 end
 
 #=
@@ -130,6 +130,9 @@ function NodalAnalysis( filename )
    numAmpSources = length( li.amplifier ) ;
    numIndSources = length( li.inductor ) ;
 
+#d = li.amplifier ;
+#println("$d");
+
    numAdditionalSources = numVoltageSources + numAmpSources + numIndSources ;
 
    # have to adjust these sizes for sources, and voltage control sources
@@ -167,6 +170,9 @@ function NodalAnalysis( filename )
          G[ minusNode, minusNode ] = G[ minusNode, minusNode ] + z ;
       end
    end
+
+#m = max(abs(G)...) ;
+#println("$m") ;
 
    # process the capacitor lines:
    for cap in li.capacitor
@@ -233,6 +239,8 @@ function NodalAnalysis( filename )
       end
    end
 
+#m = max(abs(G)...) ;
+#println("$m") ;
    nlIndex = 0 ;
    numberOfDiodes = length( li.diode ) ;
    numberOfPowers = length( li.power ) ;
@@ -254,7 +262,7 @@ function NodalAnalysis( filename )
       minusControlNodeNum  = amp.nc2 ;
       gain                 = amp.gain ;
       vt                   = amp.vt ;
-      alpha                = amp.exponent ;
+      alpha                = amp.expValue ;
 
       #println( "$amp" ) ;
 
@@ -267,6 +275,7 @@ function NodalAnalysis( filename )
          G[ plusNodeNum, r ] = 1 ;
       end
 
+println("expValue: $alpha, plusControlNodeNum: $plusControlNodeNum, minusControlNodeNum: $minusControlNodeNum");
       if ( 1.0 == alpha )
          if ( plusControlNodeNum != 0 )
             G[ r, plusControlNodeNum ] = gain/vt ;
@@ -287,6 +296,8 @@ function NodalAnalysis( filename )
       xnames[r] = "i_{E$(lt)_{$plusNodeNum,$minusNodeNum}}" ;
    end
 
+m = max(abs(G)...) ;
+println("$m") ;
    # value for r (fall through from loop above)
    # process the inductors:
    for ind in li.inductor
@@ -394,7 +405,7 @@ function NodalAnalysis( filename )
       minusNode   = pow.node2 ;
       io          = pow.io ;
       vt          = pow.vt ;
-      alpha       = pow.exponent ;
+      alpha       = pow.expValue ;
       nlIndex = nlIndex + 1 ;
 
       #println( "$pow" ) ;

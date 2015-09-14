@@ -29,7 +29,7 @@ function DiodeCurrentAndJacobian( in, V )
 
       powerType = ( nonlinear[ i ].typeDesc == :POWER ) ;
       if ( powerType )
-         exponentValue = nonlinear[ i ].exponent ;
+         exponentValue = nonlinear[ i ].expValue ;
       end
 
       # FIXME: Both of these doesn't actually have to be zero initialized.  Could just allocate.  How?

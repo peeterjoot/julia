@@ -2,10 +2,10 @@
 
 Status: 
 
-Testing HB code, finding non-convergence.
+Tests: ps1a.jl: (manual) pass.  compared to matlab results.
 
-Stepped back and tried constant linear system (1254: ps1).  See ps1a.jl for 
-current results (not working).
+Re-test HB code, and see if non-convergence issues are fixed after handling Ennn
+parsing/handling.
 
 -------------------------------------------------------------------
 
