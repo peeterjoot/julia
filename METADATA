@@ -65,6 +65,11 @@ my @julia =
    path => 'ece1229/cheb/c.jl',
    WHAT => qq(Replot chebychevDesign.tex figures with linear and log scale plots, avoiding infinities that I had in the Mathematica polarPlot.nb plots of the same.)
 },
+{
+   DATE => 'Sep 24, 2015',
+   path => 'phy1520/vectorSolenoid.jl',
+   WHAT => qq(Plot of solenoid potential for constant interior magnetic field)
+},
 ) ; # @julia
 
    return @julia ;

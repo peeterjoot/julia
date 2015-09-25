@@ -1,13 +1,15 @@
-p = Dict{Symbol,Any}() ;
-p[ :fileName ] = "../../matlab/ece1254/circuits/simpleSingleNodeRectifier.netlist" ;
-p[ :figName ] = "simpleRectifierCircuit" ;
-p[ :figNum ] = 3 ;
-p[ :logPlot ] = true ;
-p[ :figDesc ] = "ErrorAndCpuTimes" ;
-p[ :title ] = "Error and CPU times" ;
-p[ :legends ] = [ "Normalized Error", "CPU Time" ] ;
-p[ :xLabel ] = "N (Number of Harmonics)" ;
-HBSolve( 50, p ) ;
+if ( false )
+   p = Dict{Symbol,Any}() ;
+   p[ :fileName ] = "../../matlab/ece1254/circuits/simpleSingleNodeRectifier.netlist" ;
+   p[ :figName ] = "simpleRectifierCircuit" ;
+   p[ :figNum ] = 3 ;
+   p[ :logPlot ] = true ;
+   p[ :figDesc ] = "ErrorAndCpuTimes" ;
+   p[ :title ] = "Error and CPU times" ;
+   p[ :legends ] = [ "Normalized Error", "CPU Time" ] ;
+   p[ :xLabel ] = "N (Number of Harmonics)" ;
+   HBSolve( 50, p ) ;
+end
 
 #function makefigures()
 #

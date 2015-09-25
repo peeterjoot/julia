@@ -14,7 +14,9 @@ How to run this:
    workspace()
 
    # LOAD_PATH FOR julia 0.4:
-   push!(LOAD_PATH, pwd()) ; using HB ; include("makefigures.jl")
+   push!(LOAD_PATH, pwd())
+   using HB
+   include("makefigures.jl")
 
 ... hit errors that I thought might be due to rcond() "implementation" (myrcond).  but testing with:
 
@@ -53,12 +55,15 @@ Infrastructure:
       Consumes results from NodalAnalysis().
 
       FIXME: 1) deal with find() call. ... have findin, not find?
+         done?
 
    HBSolve.jl
       Harmonic Balance workhorse. 
 
-      FIXME: 1) array references to translate. ... what did I mean by that.
+      FIXME: 1) array references to translate.
+         what did I mean by that?
       FIXME: 2) min (omega) stuff.
+         ?
 
       See there's a bunch of stuff commented out.
 
