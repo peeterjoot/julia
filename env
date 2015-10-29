@@ -7,4 +7,5 @@ else
    u=/cygdrive/c/Users/$USER
 fi
 
-PATH=$u/AppData/Local/Julia-0.4.0-dev/bin:"$PATH"
+#PATH=$u/AppData/Local/Julia-0.4.0-dev/bin:"$PATH"
+PATH=$u/AppData/Local/Julia-0.4.0/bin:"$PATH"
