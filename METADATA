@@ -70,6 +70,24 @@ my @julia =
    path => 'phy1520/vectorSolenoid.jl',
    WHAT => qq(Plot of solenoid potential for constant interior magnetic field)
 },
+{
+   DATE => 'Nov 11, 2015',
+   path => 'phy1520/contourFig.jl',
+   WHAT => qq(contourFig.jl),
+   JUNK => 1,
+},
+{
+   DATE => 'Nov 11, 2015',
+   path => 'phy1520/periodicSync.jl',
+   WHAT => qq(periodicSync.jl),
+   JUNK => 1,
+},
+{
+   DATE => 'Sep 21, 2015',
+   path => 'phy1520/ps1Log.jl',
+   WHAT => qq(ps1Log.jl),
+   JUNK => 1,
+},
 ) ; # @julia
 
    return @julia ;
