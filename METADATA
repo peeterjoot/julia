@@ -88,6 +88,11 @@ my @julia =
    WHAT => qq(ps1Log.jl),
    JUNK => 1,
 },
+{
+   DATE => 'Nov 15, 2015',
+   path => 'phy1520/rodbalancing.jl',
+   WHAT => qq(Plug in some numbers for uncertainty time rod balancing calculation.)
+},
 ) ; # @julia
 
    return @julia ;
