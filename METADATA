@@ -98,6 +98,11 @@ my @julia =
    path => 'ece1236/ps1/ps1_3.jl',
    WHAT => qq(Numerical substitutions for ps1 p3.)
 },
+{
+   DATE => 'Feb 6, 2016',
+   path => 'ece1236/ps1/ps1_2.jl',
+   WHAT => qq(Numerical substitutions for ps1 p2.)
+},
 ) ; # @julia
 
    return @julia ;
