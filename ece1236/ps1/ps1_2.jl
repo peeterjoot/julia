@@ -8,9 +8,6 @@ R = 2 ;
 L = 1/(vphi^2 * C) ;
 G = 0 ;
 
-println( "vphi = $vphi" ) ;
-println( "L = $L" ) ;
-
 # f in GHz (1e9)
 function Z(f, r)
    jomega = 2 * pi * f * im * 1e9 ;
@@ -32,11 +29,13 @@ function printV(f, z, l)
    @printf( "%s(f = %0.4g \\si{GHz}) &= %0.4g \\phase{ \\ang{%0.4g} } \\\\\n", l, f, zabs, zangledegrees ) ;
 end
 
-#function printG(f, g)
-#
-#   println( "$f: $g" ) ;
-##   @printf( "\\gamma(f = %0.4g \\si{GHz}) &= %0.4g + %0.4g j \\\\\n", f, real(g), imag(g) ) ;
-#end
+function printG(f, r)
+   g = gamma(f, r) ;
+   omega = 2e9 * pi * f ; 
+   #println( "$f: $g" ) ;
+   #@printf( "\\gamma(f = %0.4g \\si{GHz}) &= %0.4g + \\omega %0.4g j \\\\\n", f, real(g), imag(g)/omega  ) ;
+   @printf( "\\gamma &= %0.4g + \\omega %0.4g j \\\\\n", real(g), imag(g)/omega  ) ;
+end
 
 function printA(f, g)
 
@@ -49,27 +48,43 @@ function printE(f, g)
    @printf( "f = %0.4g: e^{-\\lambda * \\alpha} = %0.4g \\\\\n", f, exp(-lambda * real(g)) ) ;
 end
 
+function printAB(f)
+   z = Z(f, 0) ;
+   alpha = (R/z + G * z)/2 ;
+   omega = 2 * pi * f * 1e9 ;
+   beta = omega * sqrt( L * C ) ;
 
+   #@printf( "\\alpha = %0.4g + %0.4g j\n", real(alpha), imag(alpha) ) ;
+   #@printf( "\\beta = %0.4g\n", beta ) ;
+   @printf( "\\gamma &= %0.4g + \\omega %0.4g j \\\\\n", real(alpha), beta/omega ) ;
+end
 
-printV( 1, Z(1, 0), "Z_0" ) ;
-printV( 1, Z(1, R), "Z_0" ) ;
-printV( 2, Z(2, R), "Z_0" ) ;
-printV( 3, Z(3, R), "Z_0" ) ;
-printV( 10, Z(10, R), "Z_0" ) ;
+#println( "vphi = $vphi" ) ;
+#println( "L = $L" ) ;
+
+#printV( 1, Z(1, 0), "Z_0" ) ;
+for i in [1,2,3,10]
+   printV( i, Z(i, R), "Z_0" ) ;
+end
 
 printV( 1, gamma(1, 0)/1.0, "\\gamma/f" ) ;
-printV( 1, gamma(1, R)/1.0, "\\gamma/f" ) ;
-printV( 2, gamma(2, R)/2.0, "\\gamma/f" ) ;
-printV( 3, gamma(3, R)/3.0, "\\gamma/f" ) ;
-printV( 10, gamma(10, R)/10.0, "\\gamma/f" ) ;
+for i in [1,2,3,10]
+   printV( i, gamma(i, R)/i, "\\gamma/f" ) ;
+end
 
 printA( 1, gamma(1, 0) ) ;
-printA( 1, gamma(1, R) ) ;
-printA( 2, gamma(2, R) ) ;
-printA( 3, gamma(3, R) ) ;
-printA( 10, gamma(10, R) ) ;
+for i in [1,2,3,10]
+   printA( i, gamma(i, R) ) ;
+end
 
-printE( 1, gamma(1, R) ) ;
-printE( 2, gamma(2, R) ) ;
-printE( 3, gamma(3, R) ) ;
-printE( 10, gamma(10, R) ) ;
+for i in [1,2,3,10]
+   printE( i, gamma(i, R) ) ;
+end
+
+for i in [1,2,3,10]
+   printG( i, R ) ;
+end
+
+for i in [1,2,3,10]
+   printAB( i ) ;
+end
