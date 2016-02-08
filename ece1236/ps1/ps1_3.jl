@@ -2,7 +2,7 @@
 
 z_nought = 75 ;
 vswr = 2.33 ;
-f = 3e9 ;
+f = 3e8 ;
 d = 9.7e-3 ;
 
 # part b:
@@ -12,7 +12,7 @@ println( "\\Abs{\\Gamma_\\L} = $abs_gamma_L" ) ;
 
 # part c:
 omega = 2 * pi * f ;
-vphi = 3e9 ;
+vphi = 3e8 ;
 beta = omega/vphi ;
 
 theta_L = 2 * beta * d ;
