@@ -26,11 +26,21 @@ end
 #plot( theta, abs(gamma(4)), linewidth=2.0 ) 
 
 #ylabel(L"$\left\vert \Gamma \right\vert$")
-# LatexStrings can't seem to handle \vert, \lvert or \rvert?
+# LatexStrings appears to have some limitations.  It can't seem to handle \vert, \lvert or \rvert?
 #\lvert\Gamma\rvert
 #^
 #Unknown symbol: \lvert (at char 0), (line:1, col:1)
 ylabel(L"$|\Gamma|$")
+
+# http://nbviewer.jupyter.org/github/gizmaa/Julia_Examples/blob/master/pyplot_annotation.ipynb
+ax = gca() ;
+setp(ax[:get_yticklabels](),fontsize=16) ; # Y Axis font formatting
+#setp(ax[:get_yticklabels](),fontsize=16,color="blue") ; # Y Axis font formatting
+
+# http://stackoverflow.com/a/12921209/189270
+xticks([0, pi/4, pi/2, 3*pi/4, pi],
+       [L"$0$", L"$\frac{\pi}{4}$", L"$\frac{\pi}{2}$", L"$\frac{3\pi}{4}$", L"$\pi$"])
+setp(ax[:get_xticklabels](),fontsize=18) ; # X Axis font formatting
 
 PyPlot.legend(nValues, loc="lower right") ;
 
