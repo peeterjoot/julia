@@ -111,7 +111,7 @@ my @julia =
 {
    DATE => 'Feb 8, 2016',
    path => 'ece1236/lecturenotes7/multisectionTransformer.jl',
-   WHAT => qq(This plots \\( \\Abs{1 - \\exp\\lr{2 j \\theta}}\\), the multisection quarter wavelength transformer.)
+   WHAT => qq(This plots \\( \\Gamma(\\Theta) = \\Abs{1 - \\exp\\lr{2 j \\theta}}\\), the multisection quarter wavelength transformer.)
 },
 ) ; # @julia
 
