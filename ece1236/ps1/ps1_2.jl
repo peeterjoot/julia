@@ -7,15 +7,16 @@ C = 200e-12 ;
 R = 2 ;
 L = 1/(vphi^2 * C) ;
 G = 0 ;
+GHz = 1e9 ;
 
 # f in GHz (1e9)
 function Z(f, r)
-   jomega = 2 * pi * f * im * 1e9 ;
+   jomega = 2 * pi * f * im * GHz ;
    sqrt((r + jomega * L)/(G + jomega * C))
 end
 
 function gamma(f, r)
-   jomega = 2 * pi * f * im * 1e9 ;
+   jomega = 2 * pi * f * im * GHz ;
    sqrt((r + jomega * L)*(G + jomega * C))
 end
 
@@ -26,32 +27,32 @@ function printV(f, z, l)
    zangledegrees = zangle * 180 / pi ;
 
    #println("$z");
-   @printf( "%s(f = %0.4g \\si{GHz}) &= %0.4g \\phase{ \\ang{%0.4g} } \\\\\n", l, f, zabs, zangledegrees ) ;
+   @printf( "%s(%0.4g \\,\\si{GHz}) &= %0.4g \\phase{ \\ang{%0.4g} } \\\\\n", l, f, zabs, zangledegrees ) ;
 end
 
 function printG(f, r)
    g = gamma(f, r) ;
-   omega = 2e9 * pi * f ; 
+   omega = 2 * pi * f * GHz ; 
    #println( "$f: $g" ) ;
-   #@printf( "\\gamma(f = %0.4g \\si{GHz}) &= %0.4g + \\omega %0.4g j \\\\\n", f, real(g), imag(g)/omega  ) ;
+   #@printf( "\\gamma(%0.4g \\,\\si{GHz}) &= %0.4g + \\omega %0.4g j \\\\\n", f, real(g), imag(g)/omega  ) ;
    @printf( "\\gamma &= %0.4g + \\omega %0.4g j \\\\\n", real(g), imag(g)/omega  ) ;
 end
 
 function printA(f, g)
 
-   @printf( "\\alpha(f = %0.4g \\si{GHz}) &= %0.4g \\\\\n", f, real(g) ) ;
+   @printf( "\\alpha(%0.8g \\,\\si{GHz}) &= %0.8g \\\\\n", f, real(g) ) ;
 end
 
 function printE(f, g)
 
-   lambda = vphi / (f * 1e9) ;
+   lambda = vphi / (f * GHz) ;
    @printf( "f = %0.4g: e^{-\\lambda * \\alpha} = %0.4g \\\\\n", f, exp(-lambda * real(g)) ) ;
 end
 
 function printAB(f)
    z = Z(f, 0) ;
    alpha = (R/z + G * z)/2 ;
-   omega = 2 * pi * f * 1e9 ;
+   omega = 2 * pi * f * GHz ;
    beta = omega * sqrt( L * C ) ;
 
    #@printf( "\\alpha = %0.4g + %0.4g j\n", real(alpha), imag(alpha) ) ;
@@ -59,8 +60,8 @@ function printAB(f)
    @printf( "\\gamma &= %0.4g + \\omega %0.4g j \\\\\n", real(alpha), beta/omega ) ;
 end
 
-#println( "vphi = $vphi" ) ;
-#println( "L = $L" ) ;
+println( "vphi = $vphi" ) ;
+println( "L = $L" ) ;
 
 #printV( 1, Z(1, 0), "Z_0" ) ;
 for i in [1,2,3,10]
