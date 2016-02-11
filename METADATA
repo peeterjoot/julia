@@ -113,6 +113,11 @@ my @julia =
    path => 'ece1236/lecturenotes7/multisectionTransformer.jl',
    WHAT => qq(This plots \\( \\Gamma(\\Theta) = \\Abs{1 - \\exp\\lr{2 j \\theta}}^N \\), the multisection binomial quarter wavelength transformer.)
 },
+{
+   DATE => 'Feb 10, 2016',
+   path => 'ece1236/lecturenotes7/multisectionExample.jl',
+   WHAT => qq(A quick numerical check of the logarithm approximation.)
+},
 ) ; # @julia
 
    return @julia ;
