@@ -27,18 +27,22 @@ function r(d)
    dOverw * sqrt( pi * f * mu/sigma )/ d ;
 end
 
-function gamma(d)
-   R = r(d) ;
+Rs = sqrt( omega * mu /(2 * sigma) ) ;
 
-   jomega = omega * im ;
+@printf( "R_\\txts = %0.4g\n", Rs ) ;
+@printf( "\\eta = %0.4g\n", eta ) ;
 
-   sqrt( (R + jomega * L) * ( G + jomega * C) ) ;
-end
+dunits = [ "1 \\,\\si{cm}", "1 \\,\\si{mm}", "1 \\mu \\si{m}" ]
+for useLog in [ false, true ]
+   i=1
+   for d in [ 1e-2, 1e-3, 1e-6 ]
+      alpha = Rs/(d * eta) ;
 
-for d in [1e-2, 1e-3, 1e-6]
-   g = gamma( d ) ;
-   alpha = real( g ) ;
-   z = r(d)/g ;
-
-   @printf( "d = %g ; \\alpha(d) = %g ; Z_0(d) = %g + %g j\n", d, alpha, real(z), imag(z) ) ;
+      if ( useLog == false )
+         @printf( "\\alpha(%s) &= %g \\si{m^{-1}} \\\\\n", dunits[i], alpha ) ;
+      else
+         @printf( "L(%s) &= %g \\si{dB}/m \\\\\n", dunits[i], 20 * alpha * log10( e ) ) ;
+      end
+      i = i + 1 ;
+   end
 end
