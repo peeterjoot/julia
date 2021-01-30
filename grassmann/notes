@@ -1,0 +1,58 @@
+using Pkg; Pkg.add("Grassmann")
+
+
+using Grassmann; @basis ℝ'⊕ℝ^3 # -+++
+using Grassmann; @basis ℝ^1⊕ℝ^3
+
+
+julia> using Grassmann; @basis ℝ^1⊕ℝ^3
+(⟨++++⟩, v, v₁, v₂, v₃, v₄, v₁₂, v₁₃, v₁₄, v₂₃, v₂₄, v₃₄, v₁₂₃, v₁₂₄, v₁₃₄, v₂₃₄, v₁₂₃₄)
+
+julia> @basis S"∞+++"
+(⟨∞+++⟩, v, v∞, v₁, v₂, v₃, v∞₁, v∞₂, v∞₃, v₁₂, v₁₃, v₂₃, v∞₁₂, v∞₁₃, v∞₂₃, v₁₂₃, v∞₁₂₃)
+
+julia> @basis S"+---"
+(⟨+---⟩, v, v₁, v₂, v₃, v₄, v₁₂, v₁₃, v₁₄, v₂₃, v₂₄, v₃₄, v₁₂₃, v₁₂₄, v₁₃₄, v₂₃₄, v₁₂₃₄)
+
+
+using Grassmann; @basis S"+++"
+
+julia> v1 ∧ (2 *v + v2 + 3 * v23 + v1)
+0 + 2v₁ + 1v₁₂ + 3v₁₂₃
+
+type wedge as \wedge[tab]
+
+v1*v2 # geometric product
+v1|v2 # inner product
+v1∧v2 # exterior product
+
+julia> v123
+v₁₂₃
+
+julia> v1 | (2 * v1)
+2v
+
+julia> v1 | (2 * v2)
+0v
+
+julia> v1 | (2 * v3)
+0v
+
+julia> v1 | (2 * v12)
+0v
+
+julia> v12 | v1
+1v₂
+
+julia> v12*v1
+-1v₂
+
+julia> v12 ⋅ v1
+1v₂
+
+julia> v1 ⋅ v2
+0v
+
+julia> v1 ⋅ v12
+0v
+
