@@ -4,6 +4,22 @@ using Pkg; Pkg.add("Grassmann")
 using Grassmann; @basis ℝ'⊕ℝ^3 # -+++
 using Grassmann; @basis ℝ^1⊕ℝ^3
 
+With e aliases for the basis vectors
+
+	julia> @basis ℝ^3 E e
+	(⟨+++⟩, v, v₁, v₂, v₃, v₁₂, v₁₃, v₂₃, v₁₂₃)
+
+	julia> e1
+	v₁
+
+	julia> E2
+	ERROR: UndefVarError: E2 not defined
+
+	julia> e12
+	v₁₂
+
+	julia> v12
+	v₁₂
 
 julia> using Grassmann; @basis ℝ^1⊕ℝ^3
 (⟨++++⟩, v, v₁, v₂, v₃, v₄, v₁₂, v₁₃, v₁₄, v₂₃, v₂₄, v₃₄, v₁₂₃, v₁₂₄, v₁₃₄, v₂₃₄, v₁₂₃₄)
@@ -55,4 +71,28 @@ julia> v1 ⋅ v2
 
 julia> v1 ⋅ v12
 0v
+
+
+grade selection:
+
+A = 1 + 2v1 + 3v12 + 4v123
+
+julia> (v12 + v23) * v2
+0 + 1v₁ - 1v₃
+
+julia> ((v12 + v23) * v2)(0)
+0v
+
+julia> ((v12 + v23) * v2)(1)
+1v₁ + 0v₂ - 1v₃
+
+julia> (v12 * v1)(1)
+ERROR: MethodError: no method matching (::Simplex{⟨+++⟩,1,v₂,Int64})(::Int64)
+Closest candidates are:
+  Any(::SubManifold{V,1,Indices} where Indices) where V at /home/pjoot/.julia/packages/DirectSum/aSUXQ/src/operations.jl:247
+  Any(::Simplex{V,1,B,T} where T where B) where V at /home/pjoot/.julia/packages/DirectSum/aSUXQ/src/operations.jl:252
+  Any(::Chain{V,1,𝕂,253} where 253 where 𝕂) where V at /home/pjoot/.julia/packages/Grassmann/Tvf1n/src/forms.jl:253
+  ...
+Stacktrace:
+ [1] top-level scope at REPL[9]:1
 
