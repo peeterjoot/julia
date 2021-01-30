@@ -1,0 +1,25 @@
+julia> value(-1 * v2 * v1)
+1
+
+julia> value(-2 * v2 * v1)
+2
+
+julia> typeof(-2 * v2 * v1)
+Simplex{⟨+++⟩,2,v₁₂,Int64}
+
+julia> typeof(v12)
+SubManifold{⟨+++⟩,2,0x0000000000000003}
+
+julia> typeof(v2 * v1)
+Simplex{⟨+++⟩,2,v₁₂,Int64}
+
+julia>
+
+julia> typeof(v1 * v2)
+SubManifold{⟨+++⟩,2,0x0000000000000003}
+
+julia> typeof(v12)
+SubManifold{⟨+++⟩,2,0x0000000000000003}
+
+julia> typeof(2 * v12)
+Simplex{⟨+++⟩,2,v₁₂,Int64}
