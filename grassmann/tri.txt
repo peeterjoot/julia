@@ -1,0 +1,10 @@
+
+
+julia> using Grassmann; @basis S"+++"
+(⟨+++⟩, v, v₁, v₂, v₃, v₁₂, v₁₃, v₂₃, v₁₂₃)
+
+julia> using AbstractTensors;
+
+julia> AbstractTensors.trivector(v12 * v3)
+v₁₂₃
+

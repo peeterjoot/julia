@@ -1,4 +1,6 @@
 using Pkg; Pkg.add("Grassmann")
+import Pkg ;  Pkg.add("AbstractTensors")
+using Pkg ; Pkg.add("AbstractTensors")
 
 
 using Grassmann; @basis ℝ'⊕ℝ^3 # -+++
@@ -95,4 +97,20 @@ Closest candidates are:
   ...
 Stacktrace:
  [1] top-level scope at REPL[9]:1
+
+
+julia> Grassmann.bivector(a)
+0v
+
+julia> Grassmann.bivector(v12)
+v₁₂
+
+
+
+
+julia> using Grassmann; @basis S"+++"
+(⟨+++⟩, v, v₁, v₂, v₃, v₁₂, v₁₃, v₂₃, v₁₂₃)
+
+julia> vector(v12*v1)
+-1v₂
 
