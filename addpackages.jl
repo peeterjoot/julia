@@ -1,3 +1,6 @@
+# include("addpackages.jl")
+using Pkg
+
 Pkg.add("IJulia") ;
 Pkg.add("CPUTime") ;
 Pkg.add("Cubature") ;

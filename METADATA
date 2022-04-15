@@ -28,7 +28,8 @@ my @julia =
 {
    DATE => 'Mar 25, 2015',
    path => 'ece1229/misc/pyplotPolarExample.jl',
-   WHAT => qq(A variation of https://github.com/gizmaa/Julia_Examples/blob/master/pyplot_windrose.jl to try a Julia implementation of ps4/p2)
+   #WHAT => qq(A variation of https://github.com/gizmaa/Julia_Examples/blob/master/pyplot_windrose.jl to try a Julia implementation of ps4/p2)
+   WHAT => qq(A variation of \\citep{gizmaawindrose} pyplot_windrose.jl to try a Julia implementation of ps4/p2.)
 },
 {
    DATE => 'Mar 26, 2015',

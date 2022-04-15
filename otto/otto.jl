@@ -9,19 +9,22 @@ function otto( theta, X, savename ; logThreshDB = 0, normalize = false, saveExt 
    end
 
    f1 = figure( "fig", figsize=(10,10) ) ; # Create a new figure
-   ax1 = axes( polar="true" ) ; # Create a polar axis
+   ax1 = PyPlot.axes( polar="true" ) ; # Create a polar axis
 
    n = size( X, 2 ) ;
+   n
 
    if ( logThreshDB == 0 )
       V = X ;
    else
       # convert to dB scale:
       #println( "$logThreshDB" ) ;
-      V = Array( Float64, size(X) ) ;
+      #V = Array( Float64, size(X) ) ; # old julia.
+      V = Array{Float64,1}(undef, size(X,1))
+      Xones = ones(1,n)
 
       for i = 1:n
-         V[:,i] = clamp( 10 * log10( X[:,i] ), logThreshDB, 0 )/(-logThreshDB) + 1 ;
+         V[:,i] = broadcast(+, clamp.( 10 * log10.( X[:,i] ), logThreshDB, 0 )/(-logThreshDB), Xones) ;
       end
    end
 
@@ -51,9 +54,10 @@ function otto( theta, X, savename ; logThreshDB = 0, normalize = false, saveExt 
 #      end
 
       # tick positions in [0:1] interval:
-      yrange = linrange( 1/logdelta, 1, logdelta ) ;
+      yrange = LinRange( 1/logdelta, 1, logdelta ) ;
 
-      yticks = Array( String, length( yrange ) ) ;
+      #yticks = Array( String, length( yrange ) ) ;
+      yticks = Array{String,1}(undef, length( yrange ) ) ;
       #for i = 1:logdelta
       #   yticks[i] = string( yticksN[i], "dB" ) ;
       #end
