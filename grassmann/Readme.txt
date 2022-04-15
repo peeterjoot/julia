@@ -3,7 +3,6 @@ https://github.com/chakravala/Grassmann.jl/issues/84
 
 Setup basis with:
 
-
 using Grassmann; @basis S"+++"
 (R^3)
 
