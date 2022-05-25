@@ -115,3 +115,38 @@ julia> using Grassmann; @basis S"+++"
 julia> vector(v12*v1)
 -1v₂
 
+
+
+
+
+
+My dot product is also based on grade selection, it's just a different form of it
+If you review my dotproduct screenshot above, you will recall that all variants of it can be written in terms of grad selection, so the fact that it uses grade selection is not what sets it apart from the others
+@PeeterJoot If you want the traditional dot product in Grassmann.jl you can use << and >> instead (requires v0.8 for correct usage) as opposed to < and > 
+PeeterJoot — Today at 11:12 AM
+Okay, I'll try that out.
+chakravala — Today at 11:15 AM
+here is what it returns in Grassmann v0.8
+julia> v1<v13
+v₃
+
+julia> v1<<v13
+v₃
+
+julia> v13>v1
+v₃
+
+julia> v13>>v1
+-1v₃
+In the Wolfram implementation, I still need to iron a few things out, I think Im going to be finished with UnitSystems this week and transition back to GA
+PeeterJoot — Today at 11:22 AM
+Thanks for the examples.  These are contraction like dot products I assume?
+chakravala — Today at 11:22 AM
+In v0.7 i think >> and << had a different meaning
+chakravala — Today at 11:22 AM
+Yes, \cdot is defined same as >
+PeeterJoot — Today at 11:23 AM
+i.e.: v1>v13 or v1>>v13 would both be zero?
+chakravala — Today at 11:23 AM
+They both have a left and right variants
+So yes
